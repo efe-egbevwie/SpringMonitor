@@ -1,0 +1,25 @@
+CREATE TABLE applications (
+application_alias text NOT NULL,
+actuator_url text NOT NULL,
+bearer_token text NOT NULL,
+application_id INTEGER  PRIMARY KEY AUTOINCREMENT
+);
+
+
+selectAll:
+SELECT *
+FROM applications;
+
+insertApplication:
+INSERT INTO applications(application_alias, actuator_url, bearer_token)
+VALUES (?, ?, ?);
+
+findApplicationById:
+SELECT * FROM applications WHERE application_id = ?;
+
+deleteAll:
+DELETE FROM applications;
+
+deleteById:
+DELETE FROM applications WHERE application_id = ?;
+

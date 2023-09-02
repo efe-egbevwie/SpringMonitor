@@ -11,6 +11,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import client.ActuatorLocalClient
 import setupApplication.composables.ActuatorDetails
 import setupApplication.composables.HomeScreenDescription
 import theme.SpringMonitorTheme
@@ -34,6 +35,14 @@ object SetUpScreenDestination : Screen {
 fun SetUpScreen(
     onSetUpSuccess:() -> Unit
 ) {
+
+
+    LaunchedEffect(1){
+        ActuatorLocalClient.getAllActuators.collect{
+            val apps = it.executeAsList()
+            println("apps are: $apps")
+        }
+    }
 
     val setUpScreenViewModel by remember { mutableStateOf(SetUpScreenViewModel()) }
 

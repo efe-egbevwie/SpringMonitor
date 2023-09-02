@@ -15,6 +15,7 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import setupApplication.SetUpScreenDestination
 import theme.SpringMonitorTheme
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -23,7 +24,7 @@ import theme.SpringMonitorTheme
 fun App() {
     SpringMonitorTheme {
         Surface {
-            Navigator(HomeScreenDestination) { navigator ->
+            Navigator(SetUpScreenDestination) { navigator ->
                 SlideTransition(navigator)
             }
         }
