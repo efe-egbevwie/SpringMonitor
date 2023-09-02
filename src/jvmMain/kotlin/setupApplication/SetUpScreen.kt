@@ -13,7 +13,9 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import client.ActuatorLocalClient
 import common.domain.Application
+import common.ui.sampleApplications
 import setupApplication.composables.ActuatorDetails
+import setupApplication.composables.ExistingApplicationsUi
 import setupApplication.composables.HomeScreenDescription
 import theme.SpringMonitorTheme
 
@@ -23,9 +25,25 @@ object SetUpScreenDestination : Screen {
     override fun Content() {
         val navigator: Navigator = LocalNavigator.currentOrThrow
 
+        val existingApplications = remember {
+            mutableStateListOf<Application>()
+        }
+
+        LaunchedEffect(1) {
+            ActuatorLocalClient.getAllApplications.collect { applications ->
+                existingApplications.addAll(applications)
+                println("apps are: $applications")
+            }
+        }
+
+
         SetUpScreen(
-            onSetUpSuccess = {
-                navigateToDashBoard(navigator)
+            existingApplications = existingApplications,
+            onSetUpSuccess = { newApplication ->
+                navigateToDashBoard(navigator, newApplication)
+            },
+            onApplicationItemClicked = { selectedApplication ->
+                navigateToDashBoard(navigator, selectedApplication)
             }
         )
     }
@@ -34,34 +52,42 @@ object SetUpScreenDestination : Screen {
 
 @Composable
 fun SetUpScreen(
-    onSetUpSuccess: () -> Unit
+    existingApplications: List<Application>,
+    onSetUpSuccess: (newApplication: Application) -> Unit,
+    onApplicationItemClicked: (Application) -> Unit
 ) {
 
-    val existingApplications = remember {
-        mutableStateListOf<Application>()
-    }
-
-    LaunchedEffect(1) {
-        ActuatorLocalClient.getAllApplications.collect { applications ->
-            existingApplications.addAll(applications)
-            println("apps are: $applications")
-        }
-    }
 
     val setUpScreenViewModel by remember { mutableStateOf(SetUpScreenViewModel()) }
 
     val setUpScreenState = setUpScreenViewModel.state.collectAsState()
 
     val setUpSuccess = setUpScreenState.value.getActuatorSuccess
-    if (setUpSuccess) onSetUpSuccess()
+    val newApplication = setUpScreenState.value.newApplication
+    if (setUpSuccess && newApplication != null) {
+        onSetUpSuccess(newApplication)
+    }
 
     Surface {
 
         Row(modifier = Modifier.fillMaxSize()) {
-            HomeScreenDescription(
-                existingApplications = existingApplications,
-                modifier = Modifier.fillMaxHeight().padding(start = 50.dp)
-            )
+            Column(modifier = Modifier.padding(start = 50.dp)) {
+                HomeScreenDescription()
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                ExistingApplicationsUi(
+                    applications = existingApplications,
+                    onApplicationItemClicked = { application ->
+                        onApplicationItemClicked(application)
+                    },
+                    modifier = Modifier
+                        .fillMaxHeight(0.3f)
+                        .padding(bottom = 20.dp)
+                )
+
+
+            }
 
             Spacer(modifier = Modifier.width(70.dp))
 
@@ -93,8 +119,8 @@ fun SetUpScreen(
 
 }
 
-private fun navigateToDashBoard(navigator: Navigator) {
-    navigator.replace(HomeScreenDestination)
+private fun navigateToDashBoard(navigator: Navigator, newApplication: Application) {
+    navigator.replace(HomeScreenDestination(selectedApplication = newApplication))
 }
 
 
@@ -102,7 +128,7 @@ private fun navigateToDashBoard(navigator: Navigator) {
 @Preview
 fun SetUpScreenPreview() {
     SpringMonitorTheme {
-        SetUpScreen(onSetUpSuccess = {})
+        SetUpScreen(onSetUpSuccess = {}, onApplicationItemClicked = {}, existingApplications = sampleApplications)
     }
 
 }

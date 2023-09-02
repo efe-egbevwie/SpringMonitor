@@ -1,29 +1,36 @@
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import common.domain.Application
+import common.ui.sampleApplication
 import httpRequests.HttpRequestsScreen
+import theme.SpringMonitorTheme
 
 
-object HomeScreenDestination : Screen {
+data class HomeScreenDestination(val selectedApplication: Application) : Screen {
     @Composable
     override fun Content() {
-        HomeScreen()
+
+        val currentApplication by remember {
+            mutableStateOf(selectedApplication)
+        }
+
+        HomeScreen(currentApplication)
     }
 
 }
 
 @Composable
-fun HomeScreen() {
-
-
+fun HomeScreen(selectedApplication: Application) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
 
@@ -47,6 +54,14 @@ fun HomeScreen() {
             painterResource("images/controller.svg")
         )
 
+        val iconVectors = listOf(
+            Icons.Filled.Dashboard,
+            Icons.Filled.Info,
+            Icons.Filled.Http,
+            Icons.Filled.Terminal,
+            Icons.Filled.Code
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
             IconButton(
                 onClick = { navigationExpanded = !navigationExpanded },
@@ -60,14 +75,16 @@ fun HomeScreen() {
                 ExpandedNavigationDrawer(
                     monitors = monitors,
                     selectedMonitor = selectedMonitor,
-                    iconPainters = painters,
+                    iconVectors = iconVectors,
+                    currentApplication = selectedApplication,
                     onMonitorClicked = { selectedMonitor = it }
                 )
             } else {
                 NavigationRailUi(
                     monitors = monitors,
                     selectedMonitor = selectedMonitor,
-                    iconPainters = painters,
+                    iconVectors = iconVectors,
+                    currentApplication = selectedApplication,
                     onMonitorClicked = { selectedMonitor = it }
                 )
             }
@@ -85,8 +102,9 @@ fun ExpandedNavigationDrawer(
     modifier: Modifier = Modifier,
     monitors: Array<Monitor>,
     selectedMonitor: Monitor,
-    iconPainters: List<Painter>,
-    onMonitorClicked: (Monitor) -> Unit
+    iconVectors: List<ImageVector>,
+    onMonitorClicked: (Monitor) -> Unit,
+    currentApplication: Application
 ) {
     PermanentNavigationDrawer(
         modifier = modifier.wrapContentWidth(align = Alignment.Start).fillMaxHeight(),
@@ -102,7 +120,7 @@ fun ExpandedNavigationDrawer(
                         },
                         selected = selectedMonitor == monitor,
                         icon = {
-                            Icon(iconPainters[index], contentDescription = "Dashboard")
+                            Icon(iconVectors[index], contentDescription = "Dashboard")
                         },
                         onClick = {
                             onMonitorClicked(monitor)
@@ -124,7 +142,7 @@ fun ExpandedNavigationDrawer(
                     Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
                         when (selectedMonitor) {
                             Monitor.HTTP -> {
-                                HttpRequestsScreen(modifier = Modifier.padding(20.dp))
+                                HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
                             }
 
                             else -> {
@@ -146,9 +164,10 @@ fun ExpandedNavigationDrawer(
 @Composable
 fun NavigationRailUi(
     modifier: Modifier = Modifier,
+    currentApplication: Application,
     monitors: Array<Monitor>,
     selectedMonitor: Monitor,
-    iconPainters: List<Painter>,
+    iconVectors: List<ImageVector>,
     onMonitorClicked: (Monitor) -> Unit
 ) {
 
@@ -163,7 +182,7 @@ fun NavigationRailUi(
 
                     selected = selectedMonitor == monitor,
                     icon = {
-                        Icon(iconPainters[index], contentDescription = "Dashboard")
+                        Icon(iconVectors[index], contentDescription = "Dashboard")
                     },
                     onClick = {
                         onMonitorClicked(monitor)
@@ -183,7 +202,7 @@ fun NavigationRailUi(
         Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
             when (selectedMonitor) {
                 Monitor.HTTP -> {
-                    HttpRequestsScreen(modifier = Modifier.padding(20.dp))
+                    HttpRequestsScreen(modifier = Modifier.padding(20.dp), application = currentApplication)
                 }
 
                 else -> {
@@ -207,6 +226,15 @@ enum class Monitor(val title: String) {
     HTTP("Http requests"),
     ENVIRONMENT("Environment"),
     CONTROLLERS("Controllers")
+
+}
+
+@Composable
+@Preview
+fun HomeScreenPreview() {
+    SpringMonitorTheme {
+        HomeScreen(selectedApplication = sampleApplication)
+    }
 
 }
 

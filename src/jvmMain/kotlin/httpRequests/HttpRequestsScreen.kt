@@ -16,13 +16,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import common.domain.Application
 import common.domain.HttpTrace
 import common.ui.composables.TableCell
 import common.ui.sampleHttpTrace
 import theme.SpringMonitorTheme
 
 @Composable
-fun HttpRequestsScreen(modifier: Modifier = Modifier) {
+fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) {
 
     val viewModel by remember {
         mutableStateOf(HttpTraceViewModel())
@@ -31,7 +32,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier) {
     val state = viewModel.state.collectAsState()
 
     LaunchedEffect(key1 = 1) {
-        viewModel.onEvent(HttpTraceEvent.GetAllTraces)
+        viewModel.onEvent(HttpTraceEvent.GetAllTraces(application))
     }
 
 
@@ -99,7 +100,7 @@ fun HttpTraceItem(modifier: Modifier = Modifier, httpTrace: HttpTrace) {
             Text(
                 text = httpTrace.request.requestMethod,
                 modifier = Modifier.background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = MaterialTheme.colorScheme.secondaryContainer,
                     shape = RoundedCornerShape(corner = CornerSize(8.dp))
                 )
                     .padding(8.dp)

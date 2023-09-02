@@ -4,7 +4,6 @@ import client.ActuatorRemoteClient
 import client.models.ActuatorEndpoints
 import common.domain.Application
 import common.domain.GetDataResult
-import io.ktor.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +39,12 @@ class SetUpScreenViewModel {
                 is GetDataResult.Sucess -> {
 
                     state.update { currentState ->
-                        currentState.copy(isLoading = false, actuatorEndpoints = result.data, getActuatorSuccess = true)
+                        currentState.copy(
+                            isLoading = false,
+                            actuatorEndpoints = result.data,
+                            getActuatorSuccess = true,
+                            newApplication = application
+                        )
                     }
                 }
 
@@ -61,6 +65,7 @@ data class SetUpScreenState(
     val isLoading: Boolean = false,
     val getActuatorSuccess: Boolean = false,
     val actuatorEndpoints: ActuatorEndpoints? = null,
+    val newApplication: Application? = null,
     val error: Exception? = null
 )
 

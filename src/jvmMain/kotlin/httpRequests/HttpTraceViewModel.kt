@@ -1,6 +1,7 @@
 package httpRequests
 
 import client.ActuatorRemoteClient
+import common.domain.Application
 import common.domain.GetDataResult
 import common.domain.HttpTrace
 import kotlinx.coroutines.CoroutineScope
@@ -19,11 +20,11 @@ class HttpTraceViewModel {
 
     fun onEvent(screenEvent: HttpTraceEvent) {
         when (screenEvent) {
-            is HttpTraceEvent.GetAllTraces -> getAllTraces()
+            is HttpTraceEvent.GetAllTraces -> getAllTraces(application = screenEvent.application)
         }
     }
 
-    private fun getAllTraces() {
+    private fun getAllTraces(application: Application) {
 
         state.update { currentState ->
             currentState.copy(isLoading = true)
@@ -31,8 +32,8 @@ class HttpTraceViewModel {
 
         scope.launch {
             val traceResponse = ActuatorRemoteClient.getHttpTrace(
-                traceEndpoint = "http://localhost:8080/actuator/httptrace",
-                bearerToken = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTY5Mzg2NTQyNiwiaWF0IjoxNjkzNDMzNDI2LCJ1c2VySWQiOjIsInJvbGVzIjoiQURNSU4ifQ.EwOc7X9sbjTcV6s5vz7CU0MK3xsIdk-SM22aLaA4OAc"
+                traceEndpoint = "${application.actuatorUrl}/httptrace",
+                bearerToken = application.bearerToken
             )
 
             when (traceResponse) {
@@ -61,6 +62,6 @@ data class HttpTraceScreenState(
 )
 
 sealed class HttpTraceEvent {
-    object GetAllTraces: HttpTraceEvent()
-    //data class GetAllTraces(val actuatorUrl: String, val bearerToken: String) : HttpTraceEvent()
+    data class GetAllTraces(val application: Application) : HttpTraceEvent()
+
 }
