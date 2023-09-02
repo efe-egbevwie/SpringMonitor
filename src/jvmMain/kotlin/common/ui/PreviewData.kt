@@ -1,5 +1,6 @@
 package common.ui
 
+import common.domain.Application
 import common.domain.HttpTrace
 import common.domain.TraceRequest
 import common.domain.TraceResponse
@@ -22,5 +23,20 @@ val sampleHttpTraceList = List(50) { index ->
         timeStamp = LocalDateTime.now().plusHours(index.toLong()),
         request = sampleTraceRequest,
         response = sampleTraceResponse
+    )
+}
+
+
+val sampleApplication = Application(
+    alias = "Payments Server",
+    actuatorUrl = "http://mypaymentserver.com/actuator",
+    bearerToken = ""
+)
+
+val sampleApplications = List(20){ index ->
+    Application(
+        alias = "Server: $index",
+        actuatorUrl = "http://myserver$index.com/actuator",
+        bearerToken = ""
     )
 }

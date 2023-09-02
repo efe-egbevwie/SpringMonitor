@@ -30,7 +30,7 @@ object ActuatorRemoteClient {
                     actuatorUrl = actuatorUrl,
                     bearerToken = authToken
                 )
-                ActuatorLocalClient.insertApplication(application)
+                //ActuatorLocalClient.insertApplication(application)
             }
 
             val body = response.body<ActuatorEndpoints>()

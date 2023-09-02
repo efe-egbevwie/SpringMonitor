@@ -54,7 +54,6 @@ kotlin {
                 implementation("io.ktor:ktor-client-logging-jvm:1.5.0")
                 implementation("ch.qos.logback:logback-classic:$logbackVersion")
                 implementation("io.ktor:ktor-client-logging-jvm:2.3.3")
-                implementation("com.seanproctor:data-table-material3:0.5.1")
                 implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.4.3")
 
                 implementation("com.squareup.sqldelight:runtime:1.5.5")

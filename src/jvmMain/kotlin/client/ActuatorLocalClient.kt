@@ -1,12 +1,17 @@
 package client
 
 import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.efe.applications
 import comefe.ApplicationQueries
 import comefe.Applications
 import common.domain.Application
+import common.domain.toDomainApplication
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.io.File
 
 object ActuatorLocalClient {
@@ -25,9 +30,15 @@ object ActuatorLocalClient {
 
     private val applicationQueries = ApplicationQueries(dbDriver)
 
-    val getAllActuators =
+    val getAllApplications: Flow<List<Application>> =
         applicationQueries.selectAll()
             .asFlow()
+            .mapToList(Dispatchers.IO)
+            .map { applicationsEntities ->
+                applicationsEntities.map {
+                    it.toDomainApplication()
+                }
+            }
 
 
     fun insertApplication(application: Application) {

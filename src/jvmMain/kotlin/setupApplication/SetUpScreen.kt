@@ -12,6 +12,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import client.ActuatorLocalClient
+import common.domain.Application
 import setupApplication.composables.ActuatorDetails
 import setupApplication.composables.HomeScreenDescription
 import theme.SpringMonitorTheme
@@ -33,14 +34,17 @@ object SetUpScreenDestination : Screen {
 
 @Composable
 fun SetUpScreen(
-    onSetUpSuccess:() -> Unit
+    onSetUpSuccess: () -> Unit
 ) {
 
+    val existingApplications = remember {
+        mutableStateListOf<Application>()
+    }
 
-    LaunchedEffect(1){
-        ActuatorLocalClient.getAllActuators.collect{
-            val apps = it.executeAsList()
-            println("apps are: $apps")
+    LaunchedEffect(1) {
+        ActuatorLocalClient.getAllApplications.collect { applications ->
+            existingApplications.addAll(applications)
+            println("apps are: $applications")
         }
     }
 
@@ -54,7 +58,10 @@ fun SetUpScreen(
     Surface {
 
         Row(modifier = Modifier.fillMaxSize()) {
-            HomeScreenDescription(modifier = Modifier.fillMaxHeight())
+            HomeScreenDescription(
+                existingApplications = existingApplications,
+                modifier = Modifier.fillMaxHeight().padding(start = 50.dp)
+            )
 
             Spacer(modifier = Modifier.width(70.dp))
 
