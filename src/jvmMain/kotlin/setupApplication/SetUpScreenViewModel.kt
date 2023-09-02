@@ -2,35 +2,43 @@ package setupApplication
 
 import client.ActuatorRemoteClient
 import client.models.ActuatorEndpoints
+import common.domain.Application
 import common.domain.GetDataResult
+import io.ktor.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 
 class SetUpScreenViewModel {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
     var state = MutableStateFlow(SetUpScreenState())
         private set
 
     private var viewModelScope = CoroutineScope(Dispatchers.IO)
 
     fun onEvent(event: SetUpScreenEvent) {
+
         when (event) {
             is SetUpScreenEvent.GetActuatorEndPoints -> getActuatorEndpoint(
-                actuatorUrl = event.actuatorUrl,
-                bearerToken = event.bearerToken
+                application = event.application
             )
         }
     }
 
-    private fun getActuatorEndpoint(actuatorUrl: String, bearerToken: String) {
+    private fun getActuatorEndpoint(application: Application) {
         state.update { currentState ->
             currentState.copy(isLoading = true)
         }
         viewModelScope.launch {
-            when (val result = ActuatorRemoteClient.getActuatorEndpoints(actuatorUrl, bearerToken)) {
+            val result = ActuatorRemoteClient.getActuatorEndpoints(application)
+            logger.info("set up actuator result: $result")
+            when (result) {
                 is GetDataResult.Sucess -> {
+
                     state.update { currentState ->
                         currentState.copy(isLoading = false, actuatorEndpoints = result.data, getActuatorSuccess = true)
                     }
@@ -57,5 +65,6 @@ data class SetUpScreenState(
 )
 
 sealed class SetUpScreenEvent {
-    data class GetActuatorEndPoints(val actuatorUrl: String, val bearerToken: String) : SetUpScreenEvent()
+    data class GetActuatorEndPoints(val application: Application) :
+        SetUpScreenEvent()
 }

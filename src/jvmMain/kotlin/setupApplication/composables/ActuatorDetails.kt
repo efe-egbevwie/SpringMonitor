@@ -10,17 +10,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import common.domain.Application
 import common.ui.ProgressButton
 import theme.SpringMonitorTheme
 
 @Composable
 fun ActuatorDetails(
-    onSetUpButtonClicked: (actuatorUrl: String, bearerToken: String) -> Unit,
+    onSetUpButtonClicked: (application: Application) -> Unit,
     modifier: Modifier = Modifier,
     isLoading: Boolean = false
 ) {
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
+        var appName by remember {
+            mutableStateOf("")
+        }
+
+        val appNameValid by remember(key1 = appName) {
+            mutableStateOf(appName.isNotEmpty())
+        }
 
         var actuatorUrl by remember {
             mutableStateOf("")
@@ -37,13 +45,7 @@ fun ActuatorDetails(
             mutableStateOf(bearerToken.isNotEmpty())
         }
 
-        var appName by remember {
-            mutableStateOf("")
-        }
 
-        val appNameValid by remember(key1 = appName) {
-            mutableStateOf(appName.isNotEmpty())
-        }
 
         println("app name is $appName")
         println("app name valid $appNameValid")
@@ -127,7 +129,9 @@ fun ActuatorDetails(
             onclick = {
                 showValidationErrors = true
                 if (!allDetailsValid) return@ProgressButton
-                onSetUpButtonClicked(actuatorUrl, bearerToken)
+                onSetUpButtonClicked(
+                    Application(alias = appName, actuatorUrl = actuatorUrl, bearerToken = bearerToken)
+                )
             },
             buttonText = "Set up",
             isLoading = isLoading
@@ -143,7 +147,7 @@ fun ActuatorDetailsPreview() {
     SpringMonitorTheme {
 
         Surface {
-            ActuatorDetails(onSetUpButtonClicked = { _, _ -> })
+            ActuatorDetails(onSetUpButtonClicked = { _ -> })
         }
     }
 

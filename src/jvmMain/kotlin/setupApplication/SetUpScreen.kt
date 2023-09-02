@@ -75,12 +75,9 @@ fun SetUpScreen(
                 ActuatorDetails(
                     modifier = Modifier.padding(),
                     isLoading = setUpScreenState.value.isLoading,
-                    onSetUpButtonClicked = { actuatorUrl, bearerToken ->
+                    onSetUpButtonClicked = { application ->
                         setUpScreenViewModel.onEvent(
-                            SetUpScreenEvent.GetActuatorEndPoints(
-                                actuatorUrl,
-                                bearerToken
-                            )
+                            SetUpScreenEvent.GetActuatorEndPoints(application)
                         )
                     }
                 )
