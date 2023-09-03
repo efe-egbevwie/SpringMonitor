@@ -5,7 +5,6 @@ import common.domain.Application
 import common.domain.GetDataResult
 import common.domain.HttpTrace
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -16,39 +15,38 @@ class HttpTraceViewModel {
         private set
 
 
-    private val scope = CoroutineScope(Dispatchers.IO)
-
     fun onEvent(screenEvent: HttpTraceEvent) {
         when (screenEvent) {
-            is HttpTraceEvent.GetAllTraces -> getAllTraces(application = screenEvent.application)
+            is HttpTraceEvent.GetAllTraces -> getAllTraces(
+                application = screenEvent.application,
+                coroutineScope = screenEvent.coroutineScope
+            )
         }
     }
 
-    private fun getAllTraces(application: Application) {
+    private fun getAllTraces(application: Application, coroutineScope: CoroutineScope) {
 
         state.update { currentState ->
             currentState.copy(isLoading = true)
         }
 
-        scope.launch {
-            val traceResponse = ActuatorRemoteClient.getHttpTrace(
-                traceEndpoint = "${application.actuatorUrl}/httptrace",
-                bearerToken = application.bearerToken
-            )
-
-            when (traceResponse) {
-                is GetDataResult.Sucess -> {
-                    state.update { currentState ->
-                        currentState.copy(isLoading = false, httpTraces = traceResponse.data ?: emptyList())
+        coroutineScope.launch {
+            ActuatorRemoteClient.getHttpTraces(application).collect { traceResponse ->
+                when (traceResponse) {
+                    is GetDataResult.Sucess -> {
+                        state.update { currentState ->
+                            currentState.copy(isLoading = false, httpTraces = traceResponse.data ?: emptyList())
+                        }
                     }
-                }
 
-                is GetDataResult.Failure -> {
-                    state.update { currentState ->
-                        currentState.copy(isLoading = false, error = traceResponse.exception)
+                    is GetDataResult.Failure -> {
+                        state.update { currentState ->
+                            currentState.copy(isLoading = false, error = traceResponse.exception)
+                        }
                     }
                 }
             }
+
         }
 
     }
@@ -62,6 +60,6 @@ data class HttpTraceScreenState(
 )
 
 sealed class HttpTraceEvent {
-    data class GetAllTraces(val application: Application) : HttpTraceEvent()
+    data class GetAllTraces(val application: Application, val coroutineScope: CoroutineScope) : HttpTraceEvent()
 
 }

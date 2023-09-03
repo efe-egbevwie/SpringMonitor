@@ -12,7 +12,12 @@ import common.domain.exception.CouldNotReachApplicationException
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.isActive
 import org.slf4j.LoggerFactory
+import kotlin.time.Duration.Companion.seconds
 
 object ActuatorRemoteClient {
 
@@ -60,23 +65,28 @@ object ActuatorRemoteClient {
         ActuatorLocalClient.insertApplication(application)
     }
 
-    suspend fun getHttpTrace(traceEndpoint: String, bearerToken: String): GetDataResult<List<HttpTrace>> {
-        return try {
-            val apiResponse = ktorClient.get(traceEndpoint) {
+    fun getHttpTraces(application: Application) = flow {
+
+
+        while (currentCoroutineContext().isActive) {
+            val apiResponse = ktorClient.get("${application.actuatorUrl}/httptrace") {
                 method = HttpMethod.Get
                 headers {
-                    append("Authorization", "Bearer $bearerToken")
+                    append("Authorization", "Bearer ${application.bearerToken}")
                 }
 
-            }.body<HttpTraceApiResponse>()
+            }
 
-            val httpTraces: List<HttpTrace> = apiResponse.traces.map { it.toDomainHttptrace() }
+            if (apiResponse.status == HttpStatusCode.OK) {
+                val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
+                val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }
+                emit(GetDataResult.Sucess(httpTraces))
+            } else {
+                emit(GetDataResult.Failure(CouldNotReachApplicationException()))
+            }
 
-            logger.info("traces: $httpTraces")
-            GetDataResult.Sucess(httpTraces)
-        } catch (e: Exception) {
-            logger.error("exception getting traces: $e")
-            GetDataResult.Failure(e)
+            delay(2.seconds)
+
         }
     }
 }

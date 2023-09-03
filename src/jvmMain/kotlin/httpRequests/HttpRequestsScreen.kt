@@ -31,8 +31,10 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
     val state = viewModel.state.collectAsState()
 
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(key1 = 1) {
-        viewModel.onEvent(HttpTraceEvent.GetAllTraces(application))
+        viewModel.onEvent(HttpTraceEvent.GetAllTraces(application, coroutineScope = coroutineScope))
     }
 
 
