@@ -40,20 +40,3 @@ data class TraceResponseHeaders(
     val contentType: List<String>? = null
 )
 
-interface LoggingFacede{
-    fun log()
-}
-
-class FileLogging: LoggingFacede {
-    override fun log() {
-        TODO("Not yet implemented")
-    }
-}
-
-class CommandLineLogging: LoggingFacede {
-    override fun log() {
-        TODO("Not yet implemented")
-    }
-
-}
-

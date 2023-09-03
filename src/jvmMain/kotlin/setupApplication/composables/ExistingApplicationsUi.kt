@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -41,13 +41,20 @@ fun ExistingApplicationsUi(
 @Composable
 fun ApplicationItem(
     application: Application,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showDropDownArrow: Boolean = false
 ) {
     Column(modifier) {
         Row {
             Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon")
+
             Spacer(modifier = Modifier.width(10.dp))
+
             Text(text = application.alias, style = MaterialTheme.typography.titleMedium)
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            if (showDropDownArrow) Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(

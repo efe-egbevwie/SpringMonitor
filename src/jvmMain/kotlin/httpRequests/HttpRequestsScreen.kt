@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,11 +17,14 @@ import common.domain.Application
 import common.domain.HttpTrace
 import common.ui.composables.TableCell
 import common.ui.sampleHttpTrace
+import kotlinx.coroutines.cancelChildren
 import theme.SpringMonitorTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) {
 
+    println("current app from requests screen: $application")
     val viewModel by remember {
         mutableStateOf(HttpTraceViewModel())
     }
@@ -33,7 +33,9 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(key1 = 1) {
+
+    LaunchedEffect(key1 = application) {
+        coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(HttpTraceEvent.GetAllTraces(application, coroutineScope = coroutineScope))
     }
 

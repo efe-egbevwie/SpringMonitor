@@ -1,5 +1,10 @@
+package home
+
 import androidx.compose.desktop.ui.tooling.preview.Preview
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -7,12 +12,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import common.domain.Application
 import common.ui.sampleApplication
+import common.ui.sampleApplications
 import httpRequests.HttpRequestsScreen
+import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
 
 
@@ -20,17 +26,38 @@ data class HomeScreenDestination(val selectedApplication: Application) : Screen 
     @Composable
     override fun Content() {
 
-        val currentApplication by remember {
+        var currentApplication by remember {
             mutableStateOf(selectedApplication)
         }
 
-        HomeScreen(currentApplication)
+        println("current app is $currentApplication")
+
+        val viewModel by remember {
+            mutableStateOf(HomeScreenViewModel())
+        }
+
+        LaunchedEffect(1) {
+            viewModel.onEvent(HomeScreenEvent.GetAllApplications)
+        }
+
+        val state = viewModel.state.collectAsState()
+
+        HomeScreen(
+            selectedApplication = currentApplication,
+            allApplications = state.value.allApplications,
+            onApplicationSelected = { newApplication ->
+                currentApplication = newApplication
+            })
     }
 
 }
 
 @Composable
-fun HomeScreen(selectedApplication: Application) {
+fun HomeScreen(
+    selectedApplication: Application,
+    allApplications: List<Application>,
+    onApplicationSelected: (application: Application) -> Unit
+) {
 
     Surface(modifier = Modifier.fillMaxSize()) {
 
@@ -44,15 +71,13 @@ fun HomeScreen(selectedApplication: Application) {
             mutableStateOf(true)
         }
 
+        var showAllApplicationsDropDown by remember {
+            mutableStateOf(false)
+        }
+
+
         val monitors = Monitor.values()
 
-        val painters = listOf(
-            painterResource("images/dashboard.svg"),
-            painterResource("images/info.svg"),
-            painterResource("images/web.svg"),
-            painterResource("images/environment.svg"),
-            painterResource("images/controller.svg")
-        )
 
         val iconVectors = listOf(
             Icons.Filled.Dashboard,
@@ -63,24 +88,52 @@ fun HomeScreen(selectedApplication: Application) {
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            IconButton(
-                onClick = { navigationExpanded = !navigationExpanded },
-                modifier = Modifier.padding(top = 10.dp, start = 10.dp)
-            ) {
-                Icon(Icons.Filled.List, contentDescription = "toggle navigation")
+
+            Row(modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)) {
+                IconButton(
+                    onClick = { navigationExpanded = !navigationExpanded },
+                    modifier = Modifier.padding(top = 10.dp, start = 10.dp)
+                ) {
+                    Icon(Icons.Filled.List, contentDescription = "toggle navigation")
+                }
+
+                Spacer(modifier = Modifier.width(20.dp))
+
+                ApplicationItem(
+                    application = selectedApplication,
+                    showDropDownArrow = true,
+                    modifier = Modifier.clickable {
+                        println("clicked")
+                        showAllApplicationsDropDown = !showAllApplicationsDropDown
+                    }
+                )
+
+                if (showAllApplicationsDropDown) {
+                    AllApplicationsDropDown(
+                        isExpanded = true,
+                        allApplications = allApplications,
+                        onDismiss = {
+                            showAllApplicationsDropDown = false
+                        },
+                        onApplicationClicked = { application ->
+                            onApplicationSelected(application)
+                            showAllApplicationsDropDown = false
+                        }
+
+                    )
+                }
             }
 
-
-            if (navigationExpanded) {
-                ExpandedNavigationDrawer(
+            when (navigationExpanded) {
+                true -> ExpandedNavigationDrawer(
                     monitors = monitors,
                     selectedMonitor = selectedMonitor,
                     iconVectors = iconVectors,
                     currentApplication = selectedApplication,
                     onMonitorClicked = { selectedMonitor = it }
                 )
-            } else {
-                NavigationRailUi(
+
+                false -> NavigationRailUi(
                     monitors = monitors,
                     selectedMonitor = selectedMonitor,
                     iconVectors = iconVectors,
@@ -88,6 +141,8 @@ fun HomeScreen(selectedApplication: Application) {
                     onMonitorClicked = { selectedMonitor = it }
                 )
             }
+
+
         }
 
     }
@@ -142,6 +197,7 @@ fun ExpandedNavigationDrawer(
                     Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
                         when (selectedMonitor) {
                             Monitor.HTTP -> {
+                                println("current selected app is ${currentApplication.alias}")
                                 HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
                             }
 
@@ -220,6 +276,44 @@ fun NavigationRailUi(
 
 }
 
+@Composable
+fun AllApplicationsDropDown(
+    isExpanded: Boolean,
+    onDismiss: () -> Unit,
+    allApplications: List<Application>,
+    onApplicationClicked: (Application) -> Unit
+) {
+    SpringMonitorTheme {
+        Surface {
+            DropdownMenu(
+                modifier = Modifier.wrapContentSize().padding(0.dp),
+
+                expanded = isExpanded,
+                onDismissRequest = { onDismiss.invoke() }) {
+
+                allApplications.forEach { application ->
+                    SpringMonitorTheme {
+                        Surface {
+                            DropdownMenuItem(
+                                contentPadding = PaddingValues(0.dp),
+                                modifier = Modifier.padding(10.dp),
+                                onClick = {
+                                    onApplicationClicked(application)
+                                },
+                                content = {
+                                    ApplicationItem(application)
+
+                                }
+                            )
+                        }
+                    }
+
+                }
+            }
+        }
+    }
+}
+
 enum class Monitor(val title: String) {
     DASHBOARD("Dashboard"),
     INFO("Info"),
@@ -233,7 +327,10 @@ enum class Monitor(val title: String) {
 @Preview
 fun HomeScreenPreview() {
     SpringMonitorTheme {
-        HomeScreen(selectedApplication = sampleApplication)
+        HomeScreen(
+            selectedApplication = sampleApplication,
+            allApplications = sampleApplications,
+            onApplicationSelected = {})
     }
 
 }

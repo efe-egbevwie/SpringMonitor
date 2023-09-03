@@ -29,20 +29,20 @@ data class Trace(
 data class Request(
     val method: String,
     val uri: String,
-    val headers: RequestHeaders,
+    val headers: RequestHeaders? = null,
     val remoteAddress: String? = null
 )
 
 @Serializable
 data class RequestHeaders(
-    val host: List<String>,
+    val host: List<String>? = null,
     val connection: List<String>? = null,
 
     @SerialName("accept-encoding")
     val acceptEncoding: List<String>? = null,
 
     @SerialName("user-agent")
-    val userAgent: List<String>
+    val userAgent: List<String>? = null
 )
 
 
@@ -94,18 +94,12 @@ fun Trace.toDomainHttptrace(): HttpTrace {
 
     val requestTimeStamp = zonedDateTime.toLocalDateTime()
 
-    val requestHeaders = RequestHeaders(
-        host = this.request.headers.host,
-        connection = this.request.headers.connection,
-        userAgent = this.request.headers.userAgent,
-        acceptEncoding = this.request.headers.acceptEncoding
-    )
 
     val traceRequest = TraceRequest(
         requestMethod = this.request.method,
         url = this.request.uri,
-        host = this.request.headers.host,
-        userAgent = this.request.headers.userAgent
+        host = this.request.headers?.host ?: emptyList(),
+        userAgent = this.request.headers?.userAgent ?: emptyList()
     )
 
     val traceResponseHeaders = TraceResponseHeaders(
