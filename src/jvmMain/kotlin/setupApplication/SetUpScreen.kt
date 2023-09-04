@@ -1,10 +1,12 @@
 package setupApplication
 
-import home.HomeScreenDestination
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -14,6 +16,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import client.ActuatorLocalClient
 import common.domain.Application
 import common.ui.sampleApplications
+import home.HomeScreenDestination
 import setupApplication.composables.ActuatorDetails
 import setupApplication.composables.ExistingApplicationsUi
 import setupApplication.composables.HomeScreenDescription
@@ -74,7 +77,7 @@ fun SetUpScreen(
             Column(modifier = Modifier.padding(start = 50.dp)) {
                 HomeScreenDescription()
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(40.dp))
 
                 ExistingApplicationsUi(
                     applications = existingApplications,
@@ -98,15 +101,26 @@ fun SetUpScreen(
 
                 Spacer(modifier = Modifier.height(150.dp))
 
-                ActuatorDetails(
-                    modifier = Modifier.padding(),
-                    isLoading = setUpScreenState.value.isLoading,
-                    onSetUpButtonClicked = { application ->
-                        setUpScreenViewModel.onEvent(
-                            SetUpScreenEvent.GetActuatorEndPoints(application)
-                        )
-                    }
-                )
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    Text("Set up an Application", style = MaterialTheme.typography.headlineLarge)
+
+                    Spacer(modifier = Modifier.height(50.dp))
+
+                    ActuatorDetails(
+                        modifier = Modifier.padding(),
+                        isLoading = setUpScreenState.value.isLoading,
+                        onSetUpButtonClicked = { application ->
+                            setUpScreenViewModel.onEvent(
+                                SetUpScreenEvent.GetActuatorEndPoints(application)
+                            )
+                        }
+                    )
+
+                }
+
 
             }
 

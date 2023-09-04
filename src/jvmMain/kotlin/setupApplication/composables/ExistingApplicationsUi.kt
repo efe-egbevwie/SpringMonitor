@@ -26,16 +26,23 @@ fun ExistingApplicationsUi(
     modifier: Modifier = Modifier,
     onApplicationItemClicked: (Application) -> Unit
 ) {
-    LazyColumn {
-        items(applications) { application ->
-            ApplicationItem(
-                application,
-                modifier = modifier
-                    .clickable { onApplicationItemClicked(application) }
-                    .padding(bottom = 2.dp)
-            )
+    Column {
+        Text("Applications", style = MaterialTheme.typography.titleLarge)
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        LazyColumn {
+            items(applications) { application ->
+                ApplicationItem(
+                    application,
+                    modifier = modifier
+                        .clickable { onApplicationItemClicked(application) }
+                        .padding(bottom = 2.dp)
+                )
+            }
         }
     }
+
 }
 
 @Composable

@@ -2,7 +2,6 @@ package setupApplication.composables
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,12 +57,6 @@ fun ActuatorDetails(
         val allDetailsValid by remember(keys = arrayOf(appNameValid, actuatorUrlValid, bearerTokenValid)) {
             mutableStateOf(appNameValid and actuatorUrlValid and bearerTokenValid)
         }
-
-        Spacer(modifier = Modifier.height(80.dp))
-
-        Text("Set up your Application", style = MaterialTheme.typography.headlineLarge)
-
-        Spacer(modifier = Modifier.height(50.dp))
 
         OutlinedTextField(
             label = {
