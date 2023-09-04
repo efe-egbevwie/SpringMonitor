@@ -5,6 +5,8 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.window.*
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
+import httpRequests.HttpTraceDetailPreview
+import httpRequests.HttpTraceItemPreview
 import setupApplication.SetUpScreenDestination
 import theme.SpringMonitorTheme
 import java.awt.Dimension

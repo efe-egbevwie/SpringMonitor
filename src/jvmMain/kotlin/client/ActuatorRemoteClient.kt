@@ -69,22 +69,28 @@ object ActuatorRemoteClient {
 
 
         while (currentCoroutineContext().isActive) {
-            val apiResponse = ktorClient.get("${application.actuatorUrl}/httptrace") {
-                method = HttpMethod.Get
-                headers {
-                    append("Authorization", "Bearer ${application.bearerToken}")
+
+            try {
+
+                val apiResponse = ktorClient.get("${application.actuatorUrl}/httptrace") {
+                    method = HttpMethod.Get
+                    headers {
+                        append("Authorization", "Bearer ${application.bearerToken}")
+                    }
+
                 }
 
+                if (apiResponse.status == HttpStatusCode.OK) {
+                    val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
+                    val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }
+                    emit(GetDataResult.Sucess(httpTraces))
+                } else {
+                    emit(GetDataResult.Failure(CouldNotReachApplicationException()))
+                }
+            } catch (e: Exception) {
+                println("exception getting trace: $e")
+                emit(GetDataResult.Failure(e))
             }
-
-            if (apiResponse.status == HttpStatusCode.OK) {
-                val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
-                val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }
-                emit(GetDataResult.Sucess(httpTraces))
-            } else {
-                emit(GetDataResult.Failure(CouldNotReachApplicationException()))
-            }
-
             delay(2.seconds)
 
         }

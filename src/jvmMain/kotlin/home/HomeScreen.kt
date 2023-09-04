@@ -103,7 +103,6 @@ fun HomeScreen(
                     application = selectedApplication,
                     showDropDownArrow = true,
                     modifier = Modifier.clickable {
-                        println("clicked")
                         showAllApplicationsDropDown = !showAllApplicationsDropDown
                     }
                 )
@@ -197,7 +196,6 @@ fun ExpandedNavigationDrawer(
                     Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
                         when (selectedMonitor) {
                             Monitor.HTTP -> {
-                                println("current selected app is ${currentApplication.alias}")
                                 HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
                             }
 

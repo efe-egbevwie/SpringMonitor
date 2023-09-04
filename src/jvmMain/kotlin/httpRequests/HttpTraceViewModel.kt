@@ -6,6 +6,7 @@ import common.domain.GetDataResult
 import common.domain.HttpTrace
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -31,7 +32,7 @@ class HttpTraceViewModel {
         }
 
         coroutineScope.launch {
-            ActuatorRemoteClient.getHttpTraces(application).collect { traceResponse ->
+            ActuatorRemoteClient.getHttpTraces(application).distinctUntilChanged().collect { traceResponse ->
                 when (traceResponse) {
                     is GetDataResult.Sucess -> {
                         state.update { currentState ->
