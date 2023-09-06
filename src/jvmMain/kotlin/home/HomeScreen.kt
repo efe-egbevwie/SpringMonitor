@@ -17,6 +17,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import common.domain.Application
 import common.ui.sampleApplication
 import common.ui.sampleApplications
+import dashboard.DashboardScreen
 import httpRequests.HttpRequestsScreen
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
@@ -47,7 +48,8 @@ data class HomeScreenDestination(val selectedApplication: Application) : Screen 
             allApplications = state.value.allApplications,
             onApplicationSelected = { newApplication ->
                 currentApplication = newApplication
-            })
+            }
+        )
     }
 
 }
@@ -161,10 +163,10 @@ fun ExpandedNavigationDrawer(
     currentApplication: Application
 ) {
     PermanentNavigationDrawer(
-        modifier = modifier.wrapContentWidth(align = Alignment.Start).fillMaxHeight(),
+        modifier = modifier.fillMaxWidth().fillMaxHeight().padding(start = 8.dp),
         drawerContent = {
             Column(
-                modifier = Modifier.fillMaxHeight().wrapContentWidth()
+                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.2f)
             ) {
 
                 monitors.forEachIndexed { index, monitor ->
@@ -180,7 +182,7 @@ fun ExpandedNavigationDrawer(
                             onMonitorClicked(monitor)
 
                         },
-                        modifier = Modifier.padding(top = 10.dp)
+                        modifier = Modifier.padding(top = 10.dp).fillMaxWidth()
                     )
 
                 }
@@ -188,13 +190,21 @@ fun ExpandedNavigationDrawer(
 
         },
         content = {
-            Surface {
-                Row(modifier = Modifier.padding(start = 20.dp)) {
+            Surface(modifier.fillMaxWidth()) {
+                Row(modifier.fillMaxWidth()) {
 
-                    Divider(modifier = Modifier.width(1.dp).fillMaxHeight())
+                    Spacer(modifier = Modifier.width(10.dp))
 
-                    Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
+                    Divider(modifier = modifier.width(1.dp).fillMaxHeight())
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    Box(modifier = modifier.fillMaxSize().padding(start = 8.dp)) {
                         when (selectedMonitor) {
+                            Monitor.DASHBOARD -> {
+                                DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
+                            }
+
                             Monitor.HTTP -> {
                                 HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
                             }
@@ -248,13 +258,17 @@ fun NavigationRailUi(
             }
         }
 
-        Spacer(modifier = Modifier.width(30.dp))
 
         Divider(modifier = Modifier.width(1.dp).fillMaxHeight())
 
 
         Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
             when (selectedMonitor) {
+
+                Monitor.DASHBOARD -> {
+                    DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
+                }
+
                 Monitor.HTTP -> {
                     HttpRequestsScreen(modifier = Modifier.padding(20.dp), application = currentApplication)
                 }

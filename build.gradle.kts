@@ -22,6 +22,15 @@ kotlin {
         withJava()
     }
     sourceSets {
+
+        val commonMain by getting{
+            dependencies{
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+                implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.5.21")
+
+            }
+        }
+
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
@@ -35,7 +44,7 @@ kotlin {
 
 
                 implementation(compose.desktop.currentOs)
-                implementation("org.jetbrains.compose.material3:material3-desktop:1.2.1")
+                implementation("org.jetbrains.compose.material3:material3-desktop:1.4.3")
 
                 // Navigator
                 implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
@@ -60,6 +69,9 @@ kotlin {
 
                 implementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVersion")
                 implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVersion")
+
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+                implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.5.21")
 
 
             }

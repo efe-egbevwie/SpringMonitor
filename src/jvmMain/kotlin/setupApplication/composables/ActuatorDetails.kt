@@ -2,6 +2,7 @@ package setupApplication.composables
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -13,6 +14,7 @@ import common.domain.Application
 import common.ui.ProgressButton
 import theme.SpringMonitorTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActuatorDetails(
     onSetUpButtonClicked: (application: Application) -> Unit,

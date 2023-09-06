@@ -5,6 +5,7 @@ bearer_token text NOT NULL,
 application_id INTEGER  PRIMARY KEY AUTOINCREMENT
 );
 
+UPDATE applications SET bearer_token = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImV4cCI6MTY5NDEyNTIwNSwiaWF0IjoxNjkzNjkzMjA1LCJ1c2VySWQiOjIsInJvbGVzIjoiQURNSU4ifQ.1Svsip74Noj3Q9a6s-DXT_S7ccxAEg1OrNmEgF8U5OM' WHERE application_id = '2';
 
 selectAll:
 SELECT *

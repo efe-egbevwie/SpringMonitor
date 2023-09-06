@@ -25,6 +25,7 @@ import common.domain.Application
 import common.domain.HttpTrace
 import common.domain.TraceRequest
 import common.domain.TraceResponse
+import common.ui.composables.LiveUpdatesCheckBox
 import common.ui.composables.TableCell
 import common.ui.sampleHttpTrace
 import kotlinx.coroutines.cancelChildren
@@ -35,6 +36,11 @@ import theme.SpringMonitorTheme
 fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) {
 
     println("current app from requests screen: $application")
+
+    var showLiveUpdates by remember {
+        mutableStateOf(false)
+    }
+
     val viewModel by remember {
         mutableStateOf(HttpTraceViewModel())
     }
@@ -44,19 +50,39 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
     val coroutineScope = rememberCoroutineScope()
 
 
-    LaunchedEffect(key1 = application) {
+    LaunchedEffect(key1 = application, key2 = showLiveUpdates) {
         coroutineScope.coroutineContext.cancelChildren()
-        viewModel.onEvent(HttpTraceEvent.GetAllTraces(application, coroutineScope = coroutineScope))
+        viewModel.onEvent(
+            HttpTraceEvent.GetAllTraces(
+                application,
+                coroutineScope = coroutineScope,
+                liveUpdates = showLiveUpdates
+            )
+        )
     }
 
+    Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.Start) {
 
-    Box(modifier = modifier.fillMaxSize()) {
-        if (state.value.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (state.value.httpTraces.isNotEmpty()) {
-            HttpTraceList(httpTraces = state.value.httpTraces)
+        LiveUpdatesCheckBox(modifier = modifier) { fetchLiveUpdates ->
+            showLiveUpdates = fetchLiveUpdates
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            if (state.value.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (state.value.httpTraces.isNotEmpty()) {
+                HttpTraceList(
+                    modifier = Modifier.fillMaxSize(),
+                    httpTraces = state.value.httpTraces,
+                )
+            }
         }
     }
+
+
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -65,7 +91,7 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
 
     val listState = rememberLazyListState()
 
-    Column {
+    Column(modifier = modifier) {
         LazyColumn(state = listState) {
 
             stickyHeader {
@@ -83,7 +109,7 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
                 }
             }
 
-            items(httpTraces, key = {trace -> trace}) { trace ->
+            items(httpTraces, key = { trace -> trace.timeStamp }) { trace ->
                 HttpTraceItem(httpTrace = trace, modifier = Modifier)
             }
         }
