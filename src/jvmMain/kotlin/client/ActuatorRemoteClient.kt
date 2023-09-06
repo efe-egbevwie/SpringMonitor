@@ -64,7 +64,7 @@ object ActuatorRemoteClient {
         ActuatorLocalClient.insertApplication(application)
     }
 
-    fun getHttpTraces(application: Application, shouldFetchLiveUpdates: Boolean) = flow {
+    fun getLiveHttpTraces(application: Application, shouldFetchLiveUpdates: Boolean) = flow {
 
         var isFetchingLiveUpdates: Boolean = true
 
@@ -82,7 +82,11 @@ object ActuatorRemoteClient {
 
                 if (apiResponse.status == HttpStatusCode.OK) {
                     val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
-                    val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }
+
+                    val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }.filterNot {
+                        it.request.url.endsWith("httptrace")
+                    }
+
                     emit(GetDataResult.Sucess(httpTraces))
                 } else {
                     emit(GetDataResult.Failure(CouldNotReachApplicationException()))
@@ -98,6 +102,35 @@ object ActuatorRemoteClient {
                 delay(2.seconds)
             }
 
+        }
+    }
+
+    fun getHttpTraces(application: Application) = flow {
+
+        try {
+
+            val apiResponse = ktorClient.get("${application.actuatorUrl}/httptrace") {
+                method = HttpMethod.Get
+                headers {
+                    append("Authorization", "Bearer ${application.bearerToken}")
+                }
+
+            }
+
+            if (apiResponse.status == HttpStatusCode.OK) {
+                val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
+
+                val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }.filterNot {
+                    it.request.url.endsWith("httptrace")
+                }
+
+                emit(GetDataResult.Sucess(httpTraces))
+            } else {
+                emit(GetDataResult.Failure(CouldNotReachApplicationException()))
+            }
+        } catch (e: Exception) {
+            println("exception getting trace: $e")
+            emit(GetDataResult.Failure(e))
         }
     }
 

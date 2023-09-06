@@ -20,28 +20,24 @@ class HttpTraceViewModel {
         when (screenEvent) {
             is HttpTraceEvent.GetAllTraces -> getAllTraces(
                 application = screenEvent.application,
-                coroutineScope = screenEvent.coroutineScope,
-                fetchLiveUpdates = screenEvent.liveUpdates
+                coroutineScope = screenEvent.coroutineScope
             )
         }
     }
 
-    private fun getAllTraces(application: Application, coroutineScope: CoroutineScope, fetchLiveUpdates: Boolean) {
+    private fun getAllTraces(application: Application, coroutineScope: CoroutineScope) {
 
         state.update { currentState ->
             currentState.copy(isLoading = true)
         }
 
         coroutineScope.launch {
-            ActuatorRemoteClient.getHttpTraces(application, fetchLiveUpdates).distinctUntilChanged()
+            ActuatorRemoteClient.getHttpTraces(application)
                 .collect { traceResponse ->
                     when (traceResponse) {
                         is GetDataResult.Sucess -> {
                             state.update { currentState ->
-                                val traceList = traceResponse.data?.filterNot {
-                                    it.request.url.endsWith("httptrace")
-                                }
-                                currentState.copy(isLoading = false, httpTraces = traceList ?: emptyList())
+                                currentState.copy(isLoading = false, httpTraces = traceResponse.data ?: emptyList())
                             }
                         }
 

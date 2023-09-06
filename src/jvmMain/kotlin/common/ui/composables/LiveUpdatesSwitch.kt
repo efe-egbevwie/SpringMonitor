@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import theme.SpringMonitorTheme
 
 @Composable
-fun LiveUpdatesCheckBox(
+fun LiveUpdatesSwitch(
     modifier: Modifier = Modifier,
     onLiveUpdateToggled: (shouldFetchLiveUpdate: Boolean) -> Unit
 ) {
@@ -24,7 +24,7 @@ fun LiveUpdatesCheckBox(
         mutableStateOf(false)
     }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier) {
         Switch(
             checked = shouldLoadLiveTraces,
             onCheckedChange = { checkedValue ->
@@ -43,10 +43,10 @@ fun LiveUpdatesCheckBox(
 
 @Composable
 @Preview
-fun LiveUpdatesCheckBoxPreview() {
+fun LiveUpdatesSwitchPreview() {
     SpringMonitorTheme {
         Surface {
-            LiveUpdatesCheckBox { _: Boolean ->
+            LiveUpdatesSwitch { _: Boolean ->
 
             }
         }

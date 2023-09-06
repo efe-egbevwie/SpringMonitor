@@ -3,9 +3,7 @@ package httpRequests
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +23,7 @@ import common.domain.Application
 import common.domain.HttpTrace
 import common.domain.TraceRequest
 import common.domain.TraceResponse
-import common.ui.composables.LiveUpdatesCheckBox
+import common.ui.composables.RefreshButton
 import common.ui.composables.TableCell
 import common.ui.sampleHttpTrace
 import kotlinx.coroutines.cancelChildren
@@ -37,7 +35,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
     println("current app from requests screen: $application")
 
-    var showLiveUpdates by remember {
+    var refreshHttpTraces by remember {
         mutableStateOf(false)
     }
 
@@ -50,21 +48,23 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
     val coroutineScope = rememberCoroutineScope()
 
 
-    LaunchedEffect(key1 = application, key2 = showLiveUpdates) {
+    LaunchedEffect(key1 = application, key2 = refreshHttpTraces) {
         coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(
             HttpTraceEvent.GetAllTraces(
                 application,
                 coroutineScope = coroutineScope,
-                liveUpdates = showLiveUpdates
+                liveUpdates = refreshHttpTraces
             )
         )
+
+        refreshHttpTraces = false
     }
 
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.Start) {
 
-        LiveUpdatesCheckBox(modifier = modifier) { fetchLiveUpdates ->
-            showLiveUpdates = fetchLiveUpdates
+        RefreshButton {
+            refreshHttpTraces = true
         }
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -91,49 +91,66 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
 
     val listState = rememberLazyListState()
 
-    Column(modifier = modifier) {
-        LazyColumn(state = listState) {
+    val currentList = remember {
+        mutableStateListOf<HttpTrace>()
+    }
 
-            stickyHeader {
-                Row(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(corner = CornerSize(8.dp))
-                    )
-                ) {
-                    TableCell(text = "Request Method", weight = 2F)
-                    TableCell(text = "URL", weight = 3F)
-                    TableCell(text = "Time stamp", weight = 3F)
-                    TableCell(text = "Status", weight = 1F)
 
+    LaunchedEffect(key1 = httpTraces) {
+        currentList.addAll(httpTraces)
+    }
+
+
+    Box {
+
+        Column(modifier = modifier.padding(end = 16.dp)) {
+            LazyColumn(state = listState) {
+                stickyHeader {
+                    Row(
+                        modifier = Modifier.background(
+                            color = MaterialTheme.colorScheme.background,
+                            shape = RoundedCornerShape(corner = CornerSize(8.dp))
+                        )
+                    ) {
+                        TableCell(text = "Request Method", weight = 2F)
+                        TableCell(text = "URL", weight = 3F)
+                        TableCell(text = "Time stamp", weight = 3F)
+                        TableCell(text = "Status", weight = 1F)
+
+                    }
+                }
+
+                items(currentList.distinct(), key = { trace -> trace }) { trace ->
+                    HttpTraceItem(httpTrace = trace, modifier = Modifier)
                 }
             }
-
-            items(httpTraces, key = { trace -> trace.timeStamp }) { trace ->
-                HttpTraceItem(httpTrace = trace, modifier = Modifier)
-            }
         }
+
+
+        VerticalScrollbar(
+            style = ScrollbarStyle(
+                minimalHeight = 40.dp,
+                thickness = 8.dp,
+                hoverDurationMillis = 0,
+                shape = RoundedCornerShape(8.dp),
+                unhoverColor = MaterialTheme.colorScheme.secondary,
+                hoverColor = MaterialTheme.colorScheme.primary
+
+            ),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp),
+            adapter = rememberScrollbarAdapter(
+                scrollState = listState
+            )
+        )
     }
 
-}
 
-@Composable
-fun HttpTraceHeader() {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(text = "Request Method", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.width(100.dp))
-        Text(text = "URl", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.width(300.dp))
-        Text(text = "TimeStamp", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.width(100.dp))
-        Text(text = "Response Code", style = MaterialTheme.typography.titleLarge)
-    }
 }
 
 @Composable
 fun HttpTraceItem(modifier: Modifier = Modifier, httpTrace: HttpTrace) {
 
-    var showTraceDetail by remember {
+    var showTraceDetail by remember(key1 = 1) {
         mutableStateOf(false)
     }
 
