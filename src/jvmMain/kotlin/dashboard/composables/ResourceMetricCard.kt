@@ -2,7 +2,10 @@ package dashboard.composables
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import common.ui.composables.GaugeChart
 import theme.SpringMonitorTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun ResourceMetricCardUi(
     resourceName: String,
@@ -28,7 +31,7 @@ fun ResourceMetricCardUi(
         ) {
             Text(
                 text = resourceName,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth().padding(start = 10.dp),
                 textAlign = TextAlign.Start
             )
@@ -50,7 +53,7 @@ fun ResourceMetricCardUi(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Text(text = "$formattedPercentage", style = MaterialTheme.typography.headlineLarge)
+            Text(text = "$formattedPercentage", style = MaterialTheme.typography.bodyLarge)
         }
 
 

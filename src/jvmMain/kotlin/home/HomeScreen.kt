@@ -172,7 +172,7 @@ fun ExpandedNavigationDrawer(
                 monitors.forEachIndexed { index, monitor ->
                     NavigationDrawerItem(
                         label = {
-                            Text(text = monitor.title, maxLines = 1)
+                            Text(text = monitor.title,maxLines = 1)
                         },
                         selected = selectedMonitor == monitor,
                         icon = {

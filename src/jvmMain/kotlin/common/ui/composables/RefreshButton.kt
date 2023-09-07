@@ -1,6 +1,6 @@
 package common.ui.composables
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.width
@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun RefreshButton(modifier: Modifier = Modifier, onReload: () -> Unit) {
 
-    Row (modifier, verticalAlignment = Alignment.CenterVertically){
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onReload() }) {
             Icon(Icons.Filled.Refresh, contentDescription = "Refresh")
         }
@@ -27,4 +27,11 @@ fun RefreshButton(modifier: Modifier = Modifier, onReload: () -> Unit) {
 
         Text(text = "Refresh", style = MaterialTheme.typography.titleLarge)
     }
+}
+
+
+@Composable
+@Preview
+fun RefreshButtonPreview() {
+    RefreshButton { }
 }

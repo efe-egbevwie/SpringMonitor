@@ -81,6 +81,7 @@ fun SpringMonitorTheme(
 
     MaterialTheme(
         colorScheme = colors,
+        typography = typography,
         content = content
     )
 }

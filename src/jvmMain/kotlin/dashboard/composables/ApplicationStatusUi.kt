@@ -20,7 +20,7 @@ fun ApplicationStatusCard(modifier: Modifier = Modifier, appStatus: String) {
     Card(modifier = modifier) {
         Text(
             text = "Status",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(start = 10.dp, top = 10.dp)
         )
         Spacer(modifier = Modifier.height(40.dp))
