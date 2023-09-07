@@ -4,6 +4,7 @@ import client.ActuatorRemoteClient
 import common.domain.Application
 import common.domain.DashboardMetrics
 import common.domain.GetDataResult
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,6 +12,7 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel {
 
+    private val logger = KotlinLogging.logger {  }
     var state = MutableStateFlow(DashBoardScreenState())
         private set
 
@@ -18,28 +20,39 @@ class DashboardViewModel {
         when (event) {
             is DashBoardScreenEvent.GetSystemMetrics -> getDashBoardMetrics(
                 application = event.application,
-                scope = event.coroutineScope
+                scope = event.coroutineScope,
+                fetchLiveUpdates = event.fetchLiveUpdates
             )
         }
     }
 
 
-    private fun getDashBoardMetrics(application: Application, scope: CoroutineScope) {
+    private fun getDashBoardMetrics(application: Application, scope: CoroutineScope, fetchLiveUpdates: Boolean) {
         scope.launch {
-            when (val metrics = ActuatorRemoteClient.getDashBoardMetrics(application)) {
-                is GetDataResult.Sucess -> {
-                    state.update { currentState ->
-                        println("metrics are ${metrics.data}")
-                        currentState.copy(isLoading = false, dashboardMetrics = metrics.data)
-                    }
-                }
 
-                is GetDataResult.Failure -> {
-                    state.update { currentState ->
-                        currentState.copy(isLoading = false, exception = metrics.exception)
+            ActuatorRemoteClient.getDashBoardMetrics(
+                application = application,
+                shouldFetchLiveUpdates = fetchLiveUpdates
+            ).collect { metricsResponse ->
+
+                when (metricsResponse) {
+                    is GetDataResult.Sucess -> {
+                        state.update { currentState ->
+                            logger.info {
+                                "metrics are ${metricsResponse.data}"
+                            }
+                            currentState.copy(isLoading = false, dashboardMetrics = metricsResponse.data)
+                        }
+                    }
+
+                    is GetDataResult.Failure -> {
+                        state.update { currentState ->
+                            currentState.copy(isLoading = false, exception = metricsResponse.exception)
+                        }
                     }
                 }
             }
+
         }
 
     }
@@ -47,7 +60,11 @@ class DashboardViewModel {
 }
 
 sealed class DashBoardScreenEvent {
-    data class GetSystemMetrics(val application: Application, val coroutineScope: CoroutineScope) :
+    data class GetSystemMetrics(
+        val application: Application,
+        val coroutineScope: CoroutineScope,
+        val fetchLiveUpdates: Boolean = false
+    ) :
         DashBoardScreenEvent()
 }
 

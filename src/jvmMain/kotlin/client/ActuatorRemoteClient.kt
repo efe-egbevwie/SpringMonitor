@@ -13,6 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import org.slf4j.LoggerFactory
@@ -134,59 +135,99 @@ object ActuatorRemoteClient {
         }
     }
 
-    suspend fun getDashBoardMetrics(application: Application): GetDataResult<DashboardMetrics> {
+    suspend fun getDashBoardMetrics(
+        application: Application,
+        shouldFetchLiveUpdates: Boolean = false
+    ): Flow<GetDataResult<DashboardMetrics>> = flow {
 
-        val healthStatus = when (val healthResponse = getHealthStatus(application)) {
-            is GetDataResult.Sucess -> healthResponse.data?.status
-            is GetDataResult.Failure -> return GetDataResult.Failure(healthResponse.exception)
-        }
+        var isFetchingLiveUpdates = true
 
-        val processUpTime: ProcessUpTime? =
-            when (val upTimeApiResponse = getSystemMetric(application, SystemMetric.PROCESS_UP_TIME)) {
-                is GetDataResult.Sucess -> upTimeApiResponse.data?.toProcessUpTime()
-                is GetDataResult.Failure -> return GetDataResult.Failure(upTimeApiResponse.exception)
+        while (isFetchingLiveUpdates and currentCoroutineContext().isActive) {
+
+            val healthStatus = when (val healthResponse = getHealthStatus(application)) {
+                is GetDataResult.Sucess -> healthResponse.data?.status
+                is GetDataResult.Failure -> {
+                    emit(GetDataResult.Failure(healthResponse.exception))
+                    null
+                }
             }
 
-        val cpuUsage: CpuUsage? = when (val cpuApiResponse = getSystemMetric(application, SystemMetric.CPU_USAGE)) {
-            is GetDataResult.Sucess -> cpuApiResponse.data?.toCpuUsage()
-            is GetDataResult.Failure -> return GetDataResult.Failure(cpuApiResponse.exception)
-        }
+            val processUpTime: ProcessUpTime? =
+                when (val upTimeApiResponse = getSystemMetric(application, SystemMetric.PROCESS_UP_TIME)) {
+                    is GetDataResult.Sucess -> upTimeApiResponse.data?.toProcessUpTime()
+                    is GetDataResult.Failure -> {
+                        emit(GetDataResult.Failure(upTimeApiResponse.exception))
+                        null
+                    }
+                }
 
-        val memoryUsed: MemoryUsed? =
-            when (val memoryUsedApiResponse = getSystemMetric(application, SystemMetric.MEMORY_USED)) {
-                is GetDataResult.Sucess -> memoryUsedApiResponse.data?.toMemoryUsed()
-                is GetDataResult.Failure -> return GetDataResult.Failure(memoryUsedApiResponse.exception)
+            val cpuUsage: CpuUsage? = when (val cpuApiResponse = getSystemMetric(application, SystemMetric.CPU_USAGE)) {
+                is GetDataResult.Sucess -> cpuApiResponse.data?.toCpuUsage()
+                is GetDataResult.Failure -> {
+                    emit(GetDataResult.Failure(cpuApiResponse.exception))
+                    null
+                }
             }
 
-        val memoryMax: MaxMemory? =
-            when (val memoryMaxApiResponse = getSystemMetric(application, SystemMetric.MEMORY_MAX)) {
-                is GetDataResult.Sucess -> memoryMaxApiResponse.data?.toMemoryMax()
-                is GetDataResult.Failure -> return GetDataResult.Failure(memoryMaxApiResponse.exception)
-            }
+            val memoryUsed: MemoryUsed? =
+                when (val memoryUsedApiResponse = getSystemMetric(application, SystemMetric.MEMORY_USED)) {
+                    is GetDataResult.Sucess -> memoryUsedApiResponse.data?.toMemoryUsed()
+                    is GetDataResult.Failure -> {
+                        emit(GetDataResult.Failure(memoryUsedApiResponse.exception))
+                        null
+                    }
+                }
 
-        val diskTotal: DiskTotal? =
-            when (val diskUsedApiResponse = getSystemMetric(application, SystemMetric.DISK_TOTAL)) {
-                is GetDataResult.Sucess -> diskUsedApiResponse.data?.toDiskTotal()
-                is GetDataResult.Failure -> return GetDataResult.Failure(diskUsedApiResponse.exception)
-            }
+            val memoryMax: MaxMemory? =
+                when (val memoryMaxApiResponse = getSystemMetric(application, SystemMetric.MEMORY_MAX)) {
+                    is GetDataResult.Sucess -> memoryMaxApiResponse.data?.toMemoryMax()
+                    is GetDataResult.Failure -> {
+                        emit(GetDataResult.Failure(memoryMaxApiResponse.exception))
+                        null
+                    }
+                }
 
-        val diskFree: DiskFree? =
-            when (val diskFreeApiResponse = getSystemMetric(application, SystemMetric.DISK_FREE)) {
-                is GetDataResult.Sucess -> diskFreeApiResponse.data?.toDiskFree()
-                is GetDataResult.Failure -> return GetDataResult.Failure(diskFreeApiResponse.exception)
-            }
+            val diskTotal: DiskTotal? =
+                when (val diskUsedApiResponse = getSystemMetric(application, SystemMetric.DISK_TOTAL)) {
+                    is GetDataResult.Sucess -> diskUsedApiResponse.data?.toDiskTotal()
+                    is GetDataResult.Failure -> {
+                        emit(GetDataResult.Failure(diskUsedApiResponse.exception))
+                        null
+                    }
+                }
 
-        return GetDataResult.Sucess(
-            DashboardMetrics(
-                status = healthStatus.orEmpty(),
-                upTime = processUpTime,
-                cpuUsagePercent = cpuUsage,
-                maxMemory = memoryMax,
-                memoryUsed = memoryUsed,
-                diskTotal = diskTotal,
-                diskFree = diskFree
+            val diskFree: DiskFree? =
+                when (val diskFreeApiResponse = getSystemMetric(application, SystemMetric.DISK_FREE)) {
+                    is GetDataResult.Sucess -> diskFreeApiResponse.data?.toDiskFree()
+                    is GetDataResult.Failure -> {
+                        emit(GetDataResult.Failure(diskFreeApiResponse.exception))
+                        null
+                    }
+                }
+
+            emit(
+                GetDataResult.Sucess(
+                    DashboardMetrics(
+                        status = healthStatus.orEmpty(),
+                        upTime = processUpTime,
+                        cpuUsagePercent = cpuUsage,
+                        maxMemory = memoryMax,
+                        memoryUsed = memoryUsed,
+                        diskTotal = diskTotal,
+                        diskFree = diskFree
+                    )
+                )
             )
-        )
+
+            if (!shouldFetchLiveUpdates) {
+                isFetchingLiveUpdates = false
+            } else {
+                delay(4.seconds)
+            }
+
+
+        }
+
 
     }
 

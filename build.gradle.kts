@@ -27,6 +27,7 @@ kotlin {
             dependencies{
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
                 implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.5.21")
+                implementation("io.github.oshai:kotlin-logging:5.1.0")
 
             }
         }
