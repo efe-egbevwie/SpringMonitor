@@ -23,7 +23,7 @@ fun ResourceMetricCardUi(
     modifier: Modifier = Modifier
 ) {
 
-    Card(modifier = modifier.padding(top = 10.dp, bottom = 20.dp)) {
+    Card(modifier = modifier) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier.fillMaxWidth().fillMaxHeight(),
@@ -40,9 +40,9 @@ fun ResourceMetricCardUi(
 
 //            androidx.compose.material.CircularProgressIndicator(
 //                progress = 0.7f,
-//                color = Color(0xFF306C00),
+//                color = MaterialTheme.colorScheme.primary,
 //                modifier = Modifier.size(70.dp),
-//                backgroundColor = Color(0xFF90D960)
+//                backgroundColor = MaterialTheme.colorScheme.secondary
 //            )
 
             GaugeChart(
@@ -51,7 +51,6 @@ fun ResourceMetricCardUi(
                 primaryColor = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
 
             Text(text = "$formattedPercentage", style = MaterialTheme.typography.bodyLarge)
         }
@@ -70,6 +69,7 @@ fun ResourceMetricCardUiPreview() {
                 ResourceMetricCardUi(
                     resourceName = "CPU usage",
                     resourcePercentage = 100f,
+                    formattedPercentage = "65",
                     modifier = Modifier.size(500.dp)
                 )
             }

@@ -32,7 +32,9 @@ fun ExistingApplicationsUi(
         Spacer(modifier = Modifier.height(10.dp))
 
         LazyColumn {
+
             items(applications) { application ->
+
                 ApplicationItem(
                     application,
                     modifier = modifier
@@ -51,7 +53,7 @@ fun ApplicationItem(
     modifier: Modifier = Modifier,
     showDropDownArrow: Boolean = false
 ) {
-    Column(modifier) {
+    Column(modifier.padding(8.dp)) {
         Row {
             Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon")
 

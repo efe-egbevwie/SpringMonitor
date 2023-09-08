@@ -3,8 +3,6 @@ package home
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -104,7 +102,7 @@ fun HomeScreen(
                 ApplicationItem(
                     application = selectedApplication,
                     showDropDownArrow = true,
-                    modifier = Modifier.clickable {
+                    modifier = Modifier.fillMaxWidth(0.2f).clickable {
                         showAllApplicationsDropDown = !showAllApplicationsDropDown
                     }
                 )
@@ -172,7 +170,7 @@ fun ExpandedNavigationDrawer(
                 monitors.forEachIndexed { index, monitor ->
                     NavigationDrawerItem(
                         label = {
-                            Text(text = monitor.title,maxLines = 1)
+                            Text(text = monitor.title, maxLines = 1)
                         },
                         selected = selectedMonitor == monitor,
                         icon = {
@@ -298,30 +296,33 @@ fun AllApplicationsDropDown(
     SpringMonitorTheme {
         Surface {
             DropdownMenu(
-                modifier = Modifier.wrapContentSize().padding(0.dp),
-
                 expanded = isExpanded,
-                onDismissRequest = { onDismiss.invoke() }) {
-
+                onDismissRequest = { onDismiss.invoke() }
+            ) {
                 allApplications.forEach { application ->
                     SpringMonitorTheme {
                         Surface {
+
                             DropdownMenuItem(
                                 contentPadding = PaddingValues(0.dp),
                                 modifier = Modifier.padding(10.dp),
                                 onClick = {
                                     onApplicationClicked(application)
                                 },
-                                content = {
+                                text = {
                                     ApplicationItem(application)
 
                                 }
                             )
+
+                            Divider(modifier = Modifier.height(2.dp).fillMaxWidth().padding(start = 2.dp, end = 2.dp))
+
                         }
                     }
 
                 }
             }
+
         }
     }
 }

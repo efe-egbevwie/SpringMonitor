@@ -86,6 +86,7 @@ fun SetUpScreen(
                     },
                     modifier = Modifier
                         .fillMaxHeight(0.3f)
+                        .fillMaxWidth(0.2f)
                         .padding(bottom = 20.dp)
                 )
 
