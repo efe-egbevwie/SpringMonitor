@@ -1,9 +1,9 @@
-## Spring Monitor
+# Spring Monitor
 
 A desktop application built with compose multiplatform that can be used to monitor you actuator enabled spring boot
 applications.
 
-### Current Features
+## Current Features
 
 #### System Metrics
 
@@ -22,7 +22,7 @@ applications.
 </ul>
 <br>
 
-### Upcoming Features
+## Upcoming Features
 
 #### Application info
 
@@ -43,7 +43,7 @@ applications.
 
 <br>
 
-### Screenshots
+## Screenshots
 
 <br>
 
