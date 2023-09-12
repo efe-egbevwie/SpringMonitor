@@ -54,8 +54,21 @@ object ActuatorLocalClient {
             applicationQueries.findApplicationById(applicationId.toLong()).executeAsList()
     }
 
-    fun deleteAllApps() {
+    fun updateApplication(application: Application) {
 
+        if (application.applicationId == null) return
+
+        applicationQueries.updateApplication(
+            application_alias = application.alias,
+            actuator_url = application.actuatorUrl,
+            bearer_token = application.bearerToken,
+            application_id = application.applicationId.toLong()
+        )
+    }
+
+    fun deleteApplication(applicationId: Int?) {
+        if (applicationId == null) return
+        applicationQueries.deleteById(applicationId.toLong())
     }
 
 

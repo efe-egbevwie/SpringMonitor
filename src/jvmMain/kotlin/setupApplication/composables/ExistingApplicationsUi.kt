@@ -6,12 +6,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import common.domain.Application
@@ -24,7 +25,9 @@ import theme.SpringMonitorTheme
 fun ExistingApplicationsUi(
     applications: List<Application>,
     modifier: Modifier = Modifier,
-    onApplicationItemClicked: (Application) -> Unit
+    onApplicationItemClicked: (Application) -> Unit,
+    onEditApplicationClicked: (application: Application) -> Unit,
+    onDeleteApplicationClicked: (application: Application) -> Unit
 ) {
     Column {
         Text("Applications", style = MaterialTheme.typography.titleLarge)
@@ -37,6 +40,8 @@ fun ExistingApplicationsUi(
 
                 ApplicationItem(
                     application,
+                    onDeleteApplicationClicked = onDeleteApplicationClicked,
+                    onEditApplicationClicked = onEditApplicationClicked,
                     modifier = modifier
                         .clickable { onApplicationItemClicked(application) }
                         .padding(bottom = 2.dp)
@@ -51,21 +56,40 @@ fun ExistingApplicationsUi(
 fun ApplicationItem(
     application: Application,
     modifier: Modifier = Modifier,
+    onEditApplicationClicked: (application: Application) -> Unit,
+    onDeleteApplicationClicked: (application: Application) -> Unit,
     showDropDownArrow: Boolean = false
 ) {
     Column(modifier.padding(8.dp)) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon")
-
-            Spacer(modifier = Modifier.width(10.dp))
 
             Text(text = application.alias, style = MaterialTheme.typography.titleMedium)
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.weight(1f))
+
+            IconButton(
+                onClick = {
+                    onEditApplicationClicked(application)
+                },
+                modifier = Modifier.align(Alignment.Top)
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = "Edit Application")
+            }
+
+            IconButton(
+                onClick = {
+                    onDeleteApplicationClicked(application)
+                }
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = "Delete Application")
+            }
 
             if (showDropDownArrow) Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
         }
+
         Spacer(modifier = Modifier.height(10.dp))
+
         Text(
             text = application.actuatorUrl,
             style = MaterialTheme.typography.bodySmall,
@@ -80,7 +104,10 @@ fun ApplicationItem(
 fun ApplicationItemPreview() {
     SpringMonitorTheme {
         Surface {
-            ApplicationItem(application = sampleApplication)
+            ApplicationItem(
+                application = sampleApplication,
+                onDeleteApplicationClicked = {},
+                onEditApplicationClicked = {})
         }
     }
 }
@@ -90,7 +117,11 @@ fun ApplicationItemPreview() {
 fun ExistingApplicationsUiPreview() {
     SpringMonitorTheme {
         Surface {
-            ExistingApplicationsUi(applications = sampleApplications, onApplicationItemClicked = { application -> })
+            ExistingApplicationsUi(
+                applications = sampleApplications,
+                onApplicationItemClicked = { },
+                onEditApplicationClicked = {},
+                onDeleteApplicationClicked = {})
         }
     }
 }

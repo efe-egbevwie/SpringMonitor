@@ -38,5 +38,5 @@ data class HomeScreenState(
 )
 
 sealed class HomeScreenEvent {
-    object GetAllApplications : HomeScreenEvent()
+    data object GetAllApplications : HomeScreenEvent()
 }

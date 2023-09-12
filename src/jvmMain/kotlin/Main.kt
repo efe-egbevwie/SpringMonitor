@@ -10,6 +10,7 @@ import androidx.compose.ui.window.rememberWindowState
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import setupApplication.SetUpScreenDestination
+import setupApplication.composables.ExistingApplicationsUiPreview
 import theme.SpringMonitorTheme
 import java.awt.Dimension
 import kotlin.time.Duration.Companion.seconds

@@ -102,6 +102,8 @@ fun HomeScreen(
                 ApplicationItem(
                     application = selectedApplication,
                     showDropDownArrow = true,
+                    onEditApplicationClicked = {},
+                    onDeleteApplicationClicked = {},
                     modifier = Modifier.fillMaxWidth(0.2f).clickable {
                         showAllApplicationsDropDown = !showAllApplicationsDropDown
                     }
@@ -310,7 +312,10 @@ fun AllApplicationsDropDown(
                                     onApplicationClicked(application)
                                 },
                                 text = {
-                                    ApplicationItem(application)
+                                    ApplicationItem(
+                                        application,
+                                        onEditApplicationClicked = {},
+                                        onDeleteApplicationClicked = {})
 
                                 }
                             )

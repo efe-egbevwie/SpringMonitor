@@ -15,12 +15,18 @@ import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import client.ActuatorLocalClient
 import common.domain.Application
+import common.ui.composables.DeleteApplicationDialog
+import common.ui.composables.EditApplicationDialog
 import common.ui.sampleApplications
 import home.HomeScreenDestination
+import io.github.oshai.kotlinlogging.KotlinLogging
 import setupApplication.composables.ActuatorDetails
 import setupApplication.composables.ExistingApplicationsUi
 import setupApplication.composables.HomeScreenDescription
 import theme.SpringMonitorTheme
+
+
+private val logger = KotlinLogging.logger { }
 
 
 object SetUpScreenDestination : Screen {
@@ -34,8 +40,10 @@ object SetUpScreenDestination : Screen {
 
         LaunchedEffect(1) {
             ActuatorLocalClient.getAllApplications.collect { applications ->
+                existingApplications.clear()
                 existingApplications.addAll(applications)
-                println("apps are: $applications")
+                logger.info { "existing apps are: $applications" }
+                println("apps are: $existingApplications")
             }
         }
 
@@ -71,6 +79,19 @@ fun SetUpScreen(
         onSetUpSuccess(newApplication)
     }
 
+    var showEditAppDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showDeleteApplicationDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var selectedApplication: Application? = remember {
+        null
+    }
+
+
     Surface {
 
         Row(modifier = Modifier.fillMaxSize()) {
@@ -83,6 +104,14 @@ fun SetUpScreen(
                     applications = existingApplications,
                     onApplicationItemClicked = { application ->
                         onApplicationItemClicked(application)
+                    },
+                    onEditApplicationClicked = { application ->
+                        showEditAppDialog = true
+                        selectedApplication = application
+                    },
+                    onDeleteApplicationClicked = { application ->
+                        showDeleteApplicationDialog = true
+                        selectedApplication = application
                     },
                     modifier = Modifier
                         .fillMaxHeight(0.3f)
@@ -127,6 +156,32 @@ fun SetUpScreen(
 
 
         }
+
+        EditApplicationDialog(
+            isDialogVisible = showEditAppDialog,
+            onSetUpButtonClicked = { newApplication ->
+                logger.info { "new app is : $newApplication" }
+                ActuatorLocalClient.updateApplication(application = newApplication)
+                showEditAppDialog = false
+            },
+            onDialogClosed = {
+                showEditAppDialog = false
+            },
+            application = selectedApplication,
+            modifier = Modifier.padding(20.dp)
+        )
+
+        DeleteApplicationDialog(
+            application = selectedApplication,
+            isDialogVisible = showDeleteApplicationDialog,
+            onDismiss = {
+                showDeleteApplicationDialog = false
+            },
+            onConfirm = {applicationId ->
+                ActuatorLocalClient.deleteApplication(applicationId)
+                showDeleteApplicationDialog = false
+            }
+        )
 
 
     }
