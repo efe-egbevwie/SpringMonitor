@@ -3,6 +3,8 @@ package home
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -12,7 +14,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import client.ActuatorLocalClient
 import common.domain.Application
+import common.ui.composables.ApplicationsDropDownItem
+import common.ui.composables.DeleteApplicationDialog
+import common.ui.composables.EditApplicationDialog
 import common.ui.sampleApplication
 import common.ui.sampleApplications
 import dashboard.DashboardScreen
@@ -89,6 +95,19 @@ fun HomeScreen(
 
         Column(modifier = Modifier.fillMaxSize()) {
 
+            var showEditApplicationDialog by remember {
+                mutableStateOf(false)
+            }
+            var showDeleteApplicationDialog by remember {
+                mutableStateOf(false)
+            }
+
+            var applicationForEdit: Application? = remember {
+                null
+            }
+
+
+
             Row(modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)) {
                 IconButton(
                     onClick = { navigationExpanded = !navigationExpanded },
@@ -102,8 +121,12 @@ fun HomeScreen(
                 ApplicationItem(
                     application = selectedApplication,
                     showDropDownArrow = true,
-                    onEditApplicationClicked = {},
-                    onDeleteApplicationClicked = {},
+                    onEditApplicationClicked = {
+                        showEditApplicationDialog = true
+                    },
+                    onDeleteApplicationClicked = {
+                        showDeleteApplicationDialog = true
+                    },
                     modifier = Modifier.fillMaxWidth(0.2f).clickable {
                         showAllApplicationsDropDown = !showAllApplicationsDropDown
                     }
@@ -142,6 +165,32 @@ fun HomeScreen(
                     onMonitorClicked = { selectedMonitor = it }
                 )
             }
+
+
+            EditApplicationDialog(
+                isDialogVisible = showEditApplicationDialog,
+                onSetUpButtonClicked = { newApplication ->
+                    ActuatorLocalClient.updateApplication(application = newApplication)
+                    showEditApplicationDialog = false
+                },
+                onDialogClosed = {
+                    showEditApplicationDialog = false
+                },
+                application = selectedApplication,
+                modifier = Modifier.padding(20.dp)
+            )
+
+            DeleteApplicationDialog(
+                application = selectedApplication,
+                isDialogVisible = showDeleteApplicationDialog,
+                onDismiss = {
+                    showDeleteApplicationDialog = false
+                },
+                onConfirm = { applicationId ->
+                    ActuatorLocalClient.deleteApplication(applicationId)
+                    showDeleteApplicationDialog = false
+                }
+            )
 
 
         }
@@ -305,22 +354,24 @@ fun AllApplicationsDropDown(
                     SpringMonitorTheme {
                         Surface {
 
-                            DropdownMenuItem(
-                                contentPadding = PaddingValues(0.dp),
-                                modifier = Modifier.padding(10.dp),
-                                onClick = {
-                                    onApplicationClicked(application)
-                                },
-                                text = {
-                                    ApplicationItem(
-                                        application,
-                                        onEditApplicationClicked = {},
-                                        onDeleteApplicationClicked = {})
+                            Column {
+                                DropdownMenuItem(
+                                    contentPadding = PaddingValues(0.dp),
+                                    modifier = Modifier.padding(10.dp),
+                                    onClick = {
+                                        onApplicationClicked(application)
+                                    },
+                                    text = {
+                                        ApplicationsDropDownItem(application)
+                                    }
+                                )
 
-                                }
-                            )
+//                                Divider(
+//                                    modifier = Modifier.height(2.dp).fillMaxWidth().padding(start = 2.dp, end = 2.dp)
+//                                )
 
-                            Divider(modifier = Modifier.height(2.dp).fillMaxWidth().padding(start = 2.dp, end = 2.dp))
+
+                            }
 
                         }
                     }

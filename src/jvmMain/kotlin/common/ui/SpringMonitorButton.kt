@@ -23,6 +23,7 @@ fun ProgressButton(
     Button(
         contentPadding = PaddingValues(20.dp),
         onClick = {
+            if (isLoading) return@Button
             onclick()
         },
         modifier = Modifier.fillMaxWidth(0.4f)

@@ -113,6 +113,7 @@ fun EditApplicationDialogContent(
         }
 
         OutlinedTextField(
+            singleLine = true,
             label = {
                 if (showValidationErrors and !appNameValid) {
                     Text("Enter a valid name ")
@@ -132,6 +133,7 @@ fun EditApplicationDialogContent(
 
 
         OutlinedTextField(
+            singleLine = true,
             label = {
                 if (showValidationErrors && !actuatorUrlValid) {
                     Text("Enter a valid URl")
@@ -154,6 +156,7 @@ fun EditApplicationDialogContent(
         Spacer(modifier = Modifier.height(30.dp))
 
         OutlinedTextField(
+            singleLine = true,
             label = {
                 if (showValidationErrors and !bearerTokenValid) {
                     Text("Enter a valid bearer token *")
