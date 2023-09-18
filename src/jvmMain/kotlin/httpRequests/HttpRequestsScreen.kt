@@ -19,10 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import common.domain.Application
-import common.domain.HttpTrace
-import common.domain.TraceRequest
-import common.domain.TraceResponse
+import domain.models.Application
+import domain.models.HttpTrace
+import domain.models.TraceRequest
+import domain.models.TraceResponse
 import common.ui.composables.RefreshButton
 import common.ui.composables.TableCell
 import common.ui.sampleHttpTrace

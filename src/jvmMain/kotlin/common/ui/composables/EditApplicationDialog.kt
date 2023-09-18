@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.rememberDialogState
-import common.domain.Application
+import domain.models.Application
 import common.ui.ProgressButton
 import common.ui.sampleApplication
 import theme.SpringMonitorTheme

@@ -3,8 +3,6 @@ package home
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -13,15 +11,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import applicationInfo.ApplicationInfoScreen
 import cafe.adriel.voyager.core.screen.Screen
 import client.ActuatorLocalClient
-import common.domain.Application
 import common.ui.composables.ApplicationsDropDownItem
 import common.ui.composables.DeleteApplicationDialog
 import common.ui.composables.EditApplicationDialog
 import common.ui.sampleApplication
 import common.ui.sampleApplications
 import dashboard.DashboardScreen
+import domain.models.Application
 import httpRequests.HttpRequestsScreen
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
@@ -82,7 +81,7 @@ fun HomeScreen(
         }
 
 
-        val monitors = Monitor.values()
+        val monitors = Monitor.entries.toTypedArray()
 
 
         val iconVectors = listOf(
@@ -101,11 +100,6 @@ fun HomeScreen(
             var showDeleteApplicationDialog by remember {
                 mutableStateOf(false)
             }
-
-            var applicationForEdit: Application? = remember {
-                null
-            }
-
 
 
             Row(modifier = Modifier.padding(top = 20.dp, bottom = 20.dp)) {
@@ -256,6 +250,10 @@ fun ExpandedNavigationDrawer(
 
                             Monitor.HTTP -> {
                                 HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
+                            }
+
+                            Monitor.INFO -> {
+                                ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
                             }
 
                             else -> {

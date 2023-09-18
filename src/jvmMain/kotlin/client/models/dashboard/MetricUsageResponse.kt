@@ -1,6 +1,6 @@
 package client.models.dashboard
 
-import common.domain.*
+import domain.models.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 import kotlin.time.Duration.Companion.seconds

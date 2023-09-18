@@ -1,12 +1,11 @@
 package httpRequests
 
 import client.ActuatorRemoteClient
-import common.domain.Application
-import common.domain.GetDataResult
-import common.domain.HttpTrace
+import domain.models.Application
+import domain.models.GetDataResult
+import domain.models.HttpTrace
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 

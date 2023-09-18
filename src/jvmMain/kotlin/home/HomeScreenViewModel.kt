@@ -1,7 +1,7 @@
 package home
 
 import client.ActuatorLocalClient
-import common.domain.Application
+import domain.models.Application
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

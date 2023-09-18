@@ -8,8 +8,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import common.domain.Application
-import common.domain.DashboardMetrics
+import domain.models.Application
+import domain.models.DashboardMetrics
 import common.ui.composables.LiveUpdatesSwitch
 import dashboard.composables.ApplicationStatusCard
 import dashboard.composables.ApplicationUpTimeUi

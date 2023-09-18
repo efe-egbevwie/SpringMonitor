@@ -1,9 +1,10 @@
 package common.ui
 
-import common.domain.Application
-import common.domain.HttpTrace
-import common.domain.TraceRequest
-import common.domain.TraceResponse
+import domain.models.Application
+import domain.models.HttpTrace
+import domain.models.TraceRequest
+import domain.models.TraceResponse
+import domain.models.info.AppInfoDetail
 import java.time.LocalDateTime
 
 val sampleTraceRequest = TraceRequest(
@@ -33,10 +34,67 @@ val sampleApplication = Application(
     bearerToken = ""
 )
 
-val sampleApplications = List(20){ index ->
+val sampleApplications = List(20) { index ->
     Application(
         alias = "Server: $index",
         actuatorUrl = "http://myserver$index.com/actuator",
         bearerToken = ""
     )
 }
+
+
+val appInfoPreviewData = mapOf(
+    "Git" to listOf(
+        AppInfoDetail(title = "Branch", value = "main"),
+        AppInfoDetail(title = "Time", value = "9/16/2023, 9:45 am "),
+        AppInfoDetail(title = "User", value = "Efe Egbevwie"),
+        AppInfoDetail(title = "Message", value = "fix bug with ID: 50389")
+    ),
+
+    "OS" to listOf(
+        AppInfoDetail(title = "Operating system", value = "Windows 10 (amd64)"),
+    ),
+
+    "Java" to listOf(
+        AppInfoDetail(title = "Version", value = "11"),
+        AppInfoDetail(title = "Vendor", value = "IBM temurin"),
+
+        ),
+    "Build" to listOf(
+        AppInfoDetail(title = "Version", value = "0.9"),
+        AppInfoDetail(title = "Time", value = "9/16/2023, 9:45 am "),
+        AppInfoDetail(title = "Group", value = "com.myApplication"),
+        AppInfoDetail(title = "Artifact", value = "myApplication"),
+        AppInfoDetail(title = "Name", value = "MyServer"),
+
+        )
+
+)
+
+
+
+val gitInfoPreview = listOf(
+    AppInfoDetail(title = "Branch", value = "main"),
+    AppInfoDetail(title = "Time", value = "9/16/2023, 9:45 am "),
+    AppInfoDetail(title = "User", value = "Efe Egbevwie"),
+    AppInfoDetail(title = "Message", value = "fix bug with ID: 50389")
+)
+
+val operatingSystemInfoPreview = listOf(
+    AppInfoDetail(title = "Operating system", value = "Windows 10 (amd64)"),
+)
+
+val javaInfoPreview = listOf(
+    AppInfoDetail(title = "Version", value = "11"),
+    AppInfoDetail(title = "Vendor", value = "IBM temurin"),
+
+    )
+
+val appInfoPreview = listOf(
+    AppInfoDetail(title = "Version", value = "0.9"),
+    AppInfoDetail(title = "Time", value = "9/16/2023, 9:45 am "),
+    AppInfoDetail(title = "Group", value = "com.myApplication"),
+    AppInfoDetail(title = "Artifact", value = "myApplication"),
+    AppInfoDetail(title = "Name", value = "MyServer"),
+
+    )

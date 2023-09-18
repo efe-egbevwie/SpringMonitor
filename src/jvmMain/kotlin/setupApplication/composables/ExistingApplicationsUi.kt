@@ -15,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import common.domain.Application
+import domain.models.Application
 import common.ui.sampleApplication
 import common.ui.sampleApplications
 import theme.SpringMonitorTheme

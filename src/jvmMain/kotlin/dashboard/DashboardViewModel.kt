@@ -1,9 +1,9 @@
 package dashboard
 
 import client.ActuatorRemoteClient
-import common.domain.Application
-import common.domain.DashboardMetrics
-import common.domain.GetDataResult
+import domain.models.Application
+import domain.models.DashboardMetrics
+import domain.models.GetDataResult
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

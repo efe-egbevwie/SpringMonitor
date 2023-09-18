@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import common.domain.Application
+import domain.models.Application
 import common.ui.sampleApplication
 import theme.SpringMonitorTheme
 

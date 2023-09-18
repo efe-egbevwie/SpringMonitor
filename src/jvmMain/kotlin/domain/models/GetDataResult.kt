@@ -1,4 +1,4 @@
-package common.domain
+package domain.models
 
 import kotlin.Exception
 

@@ -2,8 +2,8 @@ package setupApplication
 
 import client.ActuatorRemoteClient
 import client.models.ActuatorEndpoints
-import common.domain.Application
-import common.domain.GetDataResult
+import domain.models.Application
+import domain.models.GetDataResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

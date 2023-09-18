@@ -3,11 +3,15 @@ package client
 import client.models.ActuatorEndpoints
 import client.models.HttpTraceApiResponse
 import client.models.dashboard.*
+import client.models.info.ApplicationInfoResponse
+import client.models.info.toDomainAppInfo
 import client.models.toDomainHttptrace
-import common.domain.*
-import common.domain.exception.ActuatorNotEnabledException
-import common.domain.exception.BearerTokenNotValidException
-import common.domain.exception.CouldNotReachApplicationException
+import domain.exception.ActuatorNotEnabledException
+import domain.exception.BearerTokenNotValidException
+import domain.exception.CouldNotReachApplicationException
+import domain.models.*
+import domain.models.info.ApplicationInfo
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.http.*
@@ -16,12 +20,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
-import org.slf4j.LoggerFactory
 import kotlin.time.Duration.Companion.seconds
 
 object ActuatorRemoteClient {
 
-    private val logger = LoggerFactory.getLogger(javaClass)
+    private val logger = KotlinLogging.logger { }
 
     suspend fun getActuatorEndpoints(application: Application): GetDataResult<ActuatorEndpoints> {
         try {
@@ -283,6 +286,32 @@ object ActuatorRemoteClient {
             return (GetDataResult.Failure(e))
         }
 
+    }
+
+    suspend fun getApplicationInfo(application: Application): GetDataResult<ApplicationInfo> {
+        try {
+            val appInfoApiResponse = ktorClient.get("${application.actuatorUrl}/info") {
+                method = HttpMethod.Get
+                headers {
+                    append("Authorization", "Bearer ${application.bearerToken}")
+                }
+            }
+
+            return if (appInfoApiResponse.status == HttpStatusCode.OK) {
+                val appInfo = appInfoApiResponse.body<ApplicationInfoResponse>().toDomainAppInfo()
+
+                GetDataResult.Sucess(appInfo)
+            } else {
+                GetDataResult.Failure(CouldNotReachApplicationException())
+            }
+
+        } catch (e: Exception) {
+            logger.info {
+                "Exception getting app info: $e"
+            }
+
+            return GetDataResult.Failure(e)
+        }
     }
 
 

@@ -1,3 +1,3 @@
-package common.domain.exception
+package domain.exception
 
 class ActuatorNotEnabledException:RuntimeException()

@@ -7,8 +7,8 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.efe.applications
 import comefe.ApplicationQueries
 import comefe.Applications
-import common.domain.Application
-import common.domain.toDomainApplication
+import domain.models.Application
+import domain.models.toDomainApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map

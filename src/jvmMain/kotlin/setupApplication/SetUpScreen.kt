@@ -14,7 +14,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import client.ActuatorLocalClient
-import common.domain.Application
+import domain.models.Application
 import common.ui.composables.DeleteApplicationDialog
 import common.ui.composables.EditApplicationDialog
 import common.ui.sampleApplications

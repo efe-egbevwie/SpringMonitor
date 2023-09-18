@@ -1,9 +1,9 @@
 package client.models
 
-import common.domain.HttpTrace
-import common.domain.TraceRequest
-import common.domain.TraceResponse
-import common.domain.TraceResponseHeaders
+import domain.models.HttpTrace
+import domain.models.TraceRequest
+import domain.models.TraceResponse
+import domain.models.TraceResponseHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.Instant
