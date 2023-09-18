@@ -14,7 +14,9 @@ import androidx.compose.ui.unit.dp
 import applicationInfo.composables.ApplicationInfoCard
 import applicationInfo.models.ApplicationInfoForUi
 import common.ui.appInfoPreviewData
+import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
+import common.ui.models.LoadingState
 import domain.models.Application
 import theme.SpringMonitorTheme
 
@@ -29,16 +31,19 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(application) {
-        viewModel.onEvent(ApplicationInfoScreenEvent.GetApplictionInfo(application, scope))
+        viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application, scope))
     }
 
     val state: ApplicationInfoScreenState by viewModel.state.collectAsState()
 
+    when (state.loadingState) {
+        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.SuccessLoading -> ApplicationInfoScreenContent(
+            modifier = modifier,
+            appInfo = state.buildAppInfoForUi()
+        )
 
-    if (state.isLoading) {
-        LoadingScreen()
-    } else {
-        ApplicationInfoScreenContent(modifier = modifier, appInfo = state.buildAppInfoForUi())
+        is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
     }
 
 }

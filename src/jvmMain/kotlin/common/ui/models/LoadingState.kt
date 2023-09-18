@@ -2,7 +2,7 @@ package common.ui.models
 
 sealed class LoadingState {
 
-    data object Loaading : LoadingState()
+    data object Loading : LoadingState()
 
     data object SuccessLoading : LoadingState()
 

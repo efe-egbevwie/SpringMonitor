@@ -36,7 +36,7 @@ class SetUpScreenViewModel {
             val result = ActuatorRemoteClient.getActuatorEndpoints(application)
             logger.info("set up actuator result: $result")
             when (result) {
-                is GetDataResult.Sucess -> {
+                is GetDataResult.Success -> {
 
                     state.update { currentState ->
                         currentState.copy(

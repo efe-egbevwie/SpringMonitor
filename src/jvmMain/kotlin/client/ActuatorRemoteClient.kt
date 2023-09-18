@@ -14,6 +14,7 @@ import domain.models.info.ApplicationInfo
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
@@ -27,39 +28,27 @@ object ActuatorRemoteClient {
     private val logger = KotlinLogging.logger { }
 
     suspend fun getActuatorEndpoints(application: Application): GetDataResult<ActuatorEndpoints> {
-        try {
-            val response = ktorClient.request(application.actuatorUrl) {
+
+        val actuatorEndpointResponse = executeAPiCall<ActuatorEndpoints> {
+            ktorClient.request(application.actuatorUrl) {
                 method = HttpMethod.Get
                 headers {
                     append("Authorization", "Bearer ${application.bearerToken}")
                 }
             }
 
+        }
 
-            when (response.status) {
-                HttpStatusCode.OK -> {
-                    saveApplicationDetails(application)
-                    val body = response.body<ActuatorEndpoints>()
-                    return GetDataResult.Sucess(body)
-                }
-
-                HttpStatusCode.NotFound -> {
-                    return GetDataResult.Failure(ActuatorNotEnabledException())
-                }
-
-                HttpStatusCode.Unauthorized -> {
-                    return GetDataResult.Failure(BearerTokenNotValidException())
-                }
-
-                else -> {
-                    return GetDataResult.Failure(CouldNotReachApplicationException())
-                }
+        return when (actuatorEndpointResponse) {
+            is GetDataResult.Success -> {
+                saveApplicationDetails(application)
+                val actuatorEndpoints: ActuatorEndpoints? = actuatorEndpointResponse.data
+                GetDataResult.Success(data = actuatorEndpoints)
             }
 
-
-        } catch (e: Exception) {
-            logger.error("exception getting actuator endpoints: $e")
-            return GetDataResult.Failure(e)
+            is GetDataResult.Failure -> {
+                GetDataResult.Failure(actuatorEndpointResponse.exception)
+            }
         }
 
     }
@@ -70,7 +59,7 @@ object ActuatorRemoteClient {
 
     fun getLiveHttpTraces(application: Application, shouldFetchLiveUpdates: Boolean) = flow {
 
-        var isFetchingLiveUpdates: Boolean = true
+        var isFetchingLiveUpdates = true
 
         while (isFetchingLiveUpdates and currentCoroutineContext().isActive) {
 
@@ -91,7 +80,7 @@ object ActuatorRemoteClient {
                         it.request.url.endsWith("httptrace")
                     }
 
-                    emit(GetDataResult.Sucess(httpTraces))
+                    emit(GetDataResult.Success(httpTraces))
                 } else {
                     emit(GetDataResult.Failure(CouldNotReachApplicationException()))
                 }
@@ -109,29 +98,40 @@ object ActuatorRemoteClient {
         }
     }
 
-    fun getHttpTraces(application: Application) = flow {
+    fun getHttpTraces(application: Application): Flow<GetDataResult<List<HttpTrace>>> = flow {
 
         try {
 
-            val apiResponse = ktorClient.get("${application.actuatorUrl}/httptrace") {
-                method = HttpMethod.Get
-                headers {
-                    append("Authorization", "Bearer ${application.bearerToken}")
-                }
+            val response = executeAPiCall<HttpTraceApiResponse> {
+                ktorClient.get("${application.actuatorUrl}/httptrace") {
+                    method = HttpMethod.Get
+                    headers {
+                        append("Authorization", "Bearer ${application.bearerToken}")
+                    }
 
+                }
             }
 
-            if (apiResponse.status == HttpStatusCode.OK) {
-                val apiTraceResponse = apiResponse.body<HttpTraceApiResponse>()
+            when (response) {
+                is GetDataResult.Success -> {
 
-                val httpTraces: List<HttpTrace> = apiTraceResponse.traces.map { it.toDomainHttptrace() }.filterNot {
-                    it.request.url.endsWith("httptrace")
+                    val apiTraces = response.data?.traces
+
+                    if (apiTraces?.isEmpty() == true || apiTraces == null) {
+                        emit(GetDataResult.Success(data = emptyList()))
+                        return@flow
+                    }
+
+                    val httpTraces: List<HttpTrace> = apiTraces.map { it.toDomainHttptrace() }.filterNot {
+                        it.request.url.endsWith("httptrace")
+                    }
+
+                    emit(GetDataResult.Success(data = httpTraces))
                 }
 
-                emit(GetDataResult.Sucess(httpTraces))
-            } else {
-                emit(GetDataResult.Failure(CouldNotReachApplicationException()))
+                is GetDataResult.Failure -> emit(GetDataResult.Failure(response.exception))
             }
+
         } catch (e: Exception) {
             println("exception getting trace: $e")
             emit(GetDataResult.Failure(e))
@@ -148,68 +148,69 @@ object ActuatorRemoteClient {
         while (isFetchingLiveUpdates and currentCoroutineContext().isActive) {
 
             val healthStatus = when (val healthResponse = getHealthStatus(application)) {
-                is GetDataResult.Sucess -> healthResponse.data?.status
+                is GetDataResult.Success -> healthResponse.data?.status
                 is GetDataResult.Failure -> {
                     emit(GetDataResult.Failure(healthResponse.exception))
-                    null
+                    return@flow
                 }
             }
 
             val processUpTime: ProcessUpTime? =
                 when (val upTimeApiResponse = getSystemMetric(application, SystemMetric.PROCESS_UP_TIME)) {
-                    is GetDataResult.Sucess -> upTimeApiResponse.data?.toProcessUpTime()
+                    is GetDataResult.Success -> upTimeApiResponse.data?.toProcessUpTime()
                     is GetDataResult.Failure -> {
                         emit(GetDataResult.Failure(upTimeApiResponse.exception))
-                        null
+                        return@flow
                     }
                 }
 
             val cpuUsage: CpuUsage? = when (val cpuApiResponse = getSystemMetric(application, SystemMetric.CPU_USAGE)) {
-                is GetDataResult.Sucess -> cpuApiResponse.data?.toCpuUsage()
+                is GetDataResult.Success -> cpuApiResponse.data?.toCpuUsage()
                 is GetDataResult.Failure -> {
                     emit(GetDataResult.Failure(cpuApiResponse.exception))
-                    null
+                    return@flow
+
                 }
             }
 
             val memoryUsed: MemoryUsed? =
                 when (val memoryUsedApiResponse = getSystemMetric(application, SystemMetric.MEMORY_USED)) {
-                    is GetDataResult.Sucess -> memoryUsedApiResponse.data?.toMemoryUsed()
+                    is GetDataResult.Success -> memoryUsedApiResponse.data?.toMemoryUsed()
                     is GetDataResult.Failure -> {
                         emit(GetDataResult.Failure(memoryUsedApiResponse.exception))
-                        null
+                        return@flow
                     }
                 }
 
             val memoryMax: MaxMemory? =
                 when (val memoryMaxApiResponse = getSystemMetric(application, SystemMetric.MEMORY_MAX)) {
-                    is GetDataResult.Sucess -> memoryMaxApiResponse.data?.toMemoryMax()
+                    is GetDataResult.Success -> memoryMaxApiResponse.data?.toMemoryMax()
                     is GetDataResult.Failure -> {
                         emit(GetDataResult.Failure(memoryMaxApiResponse.exception))
-                        null
+                        return@flow
                     }
                 }
 
             val diskTotal: DiskTotal? =
                 when (val diskUsedApiResponse = getSystemMetric(application, SystemMetric.DISK_TOTAL)) {
-                    is GetDataResult.Sucess -> diskUsedApiResponse.data?.toDiskTotal()
+                    is GetDataResult.Success -> diskUsedApiResponse.data?.toDiskTotal()
                     is GetDataResult.Failure -> {
                         emit(GetDataResult.Failure(diskUsedApiResponse.exception))
-                        null
+                        return@flow
                     }
                 }
 
             val diskFree: DiskFree? =
                 when (val diskFreeApiResponse = getSystemMetric(application, SystemMetric.DISK_FREE)) {
-                    is GetDataResult.Sucess -> diskFreeApiResponse.data?.toDiskFree()
+                    is GetDataResult.Success -> diskFreeApiResponse.data?.toDiskFree()
                     is GetDataResult.Failure -> {
                         emit(GetDataResult.Failure(diskFreeApiResponse.exception))
-                        null
+                        return@flow
                     }
                 }
 
             emit(
-                GetDataResult.Sucess(
+                GetDataResult.Success(
                     DashboardMetrics(
                         status = healthStatus.orEmpty(),
                         upTime = processUpTime,
@@ -238,79 +239,79 @@ object ActuatorRemoteClient {
         application: Application,
         metricType: SystemMetric
     ): GetDataResult<MetricUsageResponse> {
-        try {
-            val pathUrl = SystemMetric.getMetricPathUrl(metricType)
 
-            val apiResponse = ktorClient.get("${application.actuatorUrl}/metrics/$pathUrl") {
+        return executeAPiCall<MetricUsageResponse> {
+            val pathUrl = SystemMetric.getMetricPathUrl(metricType)
+            ktorClient.get("${application.actuatorUrl}/metrics/$pathUrl") {
                 method = HttpMethod.Get
                 headers {
                     append("Authorization", "Bearer ${application.bearerToken}")
                 }
 
             }
-
-            return if (apiResponse.status == HttpStatusCode.OK) {
-                val healthResponse = apiResponse.body<MetricUsageResponse>()
-
-                (GetDataResult.Sucess(healthResponse))
-            } else {
-                GetDataResult.Failure(CouldNotReachApplicationException())
-            }
-        } catch (e: Exception) {
-            println("exception getting trace: $e")
-            return (GetDataResult.Failure(e))
         }
 
     }
 
     private suspend fun getHealthStatus(application: Application): GetDataResult<HealthResponse> {
-        try {
-
-            val apiResponse = ktorClient.get("${application.actuatorUrl}/health") {
+        val healthStatusResponse: GetDataResult<HealthResponse> = executeAPiCall<HealthResponse> {
+            ktorClient.get("${application.actuatorUrl}/health") {
                 method = HttpMethod.Get
                 headers {
                     append("Authorization", "Bearer ${application.bearerToken}")
                 }
 
             }
-
-            return if (apiResponse.status == HttpStatusCode.OK) {
-                val healthResponse = apiResponse.body<HealthResponse>()
-
-                (GetDataResult.Sucess(healthResponse))
-            } else {
-                GetDataResult.Failure(CouldNotReachApplicationException())
-            }
-        } catch (e: Exception) {
-            println("exception getting trace: $e")
-            return (GetDataResult.Failure(e))
         }
 
+        return healthStatusResponse
     }
 
     suspend fun getApplicationInfo(application: Application): GetDataResult<ApplicationInfo> {
-        try {
-            val appInfoApiResponse = ktorClient.get("${application.actuatorUrl}/info") {
+
+        val applicationInfoResponse = executeAPiCall<ApplicationInfoResponse> {
+            ktorClient.get("${application.actuatorUrl}/info") {
                 method = HttpMethod.Get
                 headers {
                     append("Authorization", "Bearer ${application.bearerToken}")
                 }
             }
+        }
 
-            return if (appInfoApiResponse.status == HttpStatusCode.OK) {
-                val appInfo = appInfoApiResponse.body<ApplicationInfoResponse>().toDomainAppInfo()
+        return when (applicationInfoResponse) {
+            is GetDataResult.Success -> {
+                val appInfo = applicationInfoResponse.data?.toDomainAppInfo()
+                GetDataResult.Success(appInfo)
+            }
 
-                GetDataResult.Sucess(appInfo)
-            } else {
-                GetDataResult.Failure(CouldNotReachApplicationException())
+            is GetDataResult.Failure -> {
+                GetDataResult.Failure(applicationInfoResponse.exception)
+            }
+        }
+
+
+    }
+
+
+    private suspend inline fun <reified T : Any> executeAPiCall(
+        apiCall: () -> HttpResponse
+    ): GetDataResult<T> {
+
+        return try {
+
+            val apiResult = apiCall()
+
+            when (apiResult.status) {
+                HttpStatusCode.OK -> GetDataResult.Success(data = apiResult.body())
+                HttpStatusCode.NotFound -> GetDataResult.Failure(exception = ActuatorNotEnabledException())
+                HttpStatusCode.Unauthorized -> GetDataResult.Failure(BearerTokenNotValidException())
+                HttpStatusCode.Forbidden -> GetDataResult.Failure(BearerTokenNotValidException())
+                else -> GetDataResult.Failure(CouldNotReachApplicationException())
             }
 
         } catch (e: Exception) {
-            logger.info {
-                "Exception getting app info: $e"
-            }
-
-            return GetDataResult.Failure(e)
+            logger.info { "failure executing api call: $e" }
+            GetDataResult.Failure(CouldNotReachApplicationException())
         }
     }
 

@@ -3,17 +3,18 @@ package dashboard
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import domain.models.Application
-import domain.models.DashboardMetrics
 import common.ui.composables.LiveUpdatesSwitch
+import common.ui.composables.screens.ErrorScreen
+import common.ui.composables.screens.LoadingScreen
+import common.ui.models.LoadingState
 import dashboard.composables.ApplicationStatusCard
 import dashboard.composables.ApplicationUpTimeUi
 import dashboard.composables.ResourceMetricCardUi
+import domain.models.Application
+import domain.models.DashboardMetrics
 import kotlinx.coroutines.cancelChildren
 
 
@@ -29,20 +30,19 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val state: State<DashBoardScreenState> = viewModel.state.collectAsState()
+    val state: DashBoardScreenState by viewModel.state.collectAsState()
 
-    val dashBoardMetrics = state.value.dashboardMetrics
+    val dashBoardMetrics = state.dashboardMetrics
 
     LaunchedEffect(key1 = application, key2 = fetchLiveUpdates) {
         coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application, coroutineScope, fetchLiveUpdates))
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        if (state.value.isLoading) {
-
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (dashBoardMetrics != null) {
+    when (state.loadingState) {
+        is LoadingState.Loading -> LoadingScreen()
+        is LoadingState.SuccessLoading -> {
+            if (dashBoardMetrics == null) return
 
             DashBoardScreenContent(
                 modifier = modifier.padding(start = 20.dp, end = 20.dp),
@@ -52,6 +52,8 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
                 }
             )
         }
+
+        is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
     }
 
 

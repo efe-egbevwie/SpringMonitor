@@ -18,7 +18,7 @@ import domain.exception.CouldNotReachApplicationException
 import theme.SpringMonitorTheme
 
 @Composable
-fun ErrorScreen(exception: Exception, modifier: Modifier = Modifier) {
+fun ErrorScreen(exception: Exception?, modifier: Modifier = Modifier) {
 
     val errorMessage = when (exception) {
         is ActuatorNotEnabledException -> "Spring boot actuator is not enabled for this application"

@@ -1,6 +1,7 @@
 package dashboard
 
 import client.ActuatorRemoteClient
+import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.DashboardMetrics
 import domain.models.GetDataResult
@@ -12,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class DashboardViewModel {
 
-    private val logger = KotlinLogging.logger {  }
+    private val logger = KotlinLogging.logger { }
     var state = MutableStateFlow(DashBoardScreenState())
         private set
 
@@ -28,6 +29,9 @@ class DashboardViewModel {
 
 
     private fun getDashBoardMetrics(application: Application, scope: CoroutineScope, fetchLiveUpdates: Boolean) {
+
+        setStateToLoading()
+
         scope.launch {
 
             ActuatorRemoteClient.getDashBoardMetrics(
@@ -35,19 +39,28 @@ class DashboardViewModel {
                 shouldFetchLiveUpdates = fetchLiveUpdates
             ).collect { metricsResponse ->
 
+                logger.info {
+                    "metrics response: $metricsResponse"
+                }
                 when (metricsResponse) {
-                    is GetDataResult.Sucess -> {
+                    is GetDataResult.Success -> {
                         state.update { currentState ->
                             logger.info {
                                 "metrics are ${metricsResponse.data}"
                             }
-                            currentState.copy(isLoading = false, dashboardMetrics = metricsResponse.data)
+                            currentState.copy(
+                                dashboardMetrics = metricsResponse.data,
+                                loadingState = LoadingState.SuccessLoading
+                            )
                         }
                     }
 
                     is GetDataResult.Failure -> {
                         state.update { currentState ->
-                            currentState.copy(isLoading = false, exception = metricsResponse.exception)
+                            currentState.copy(
+                                exception = metricsResponse.exception,
+                                loadingState = LoadingState.FailedToLoad
+                            )
                         }
                     }
                 }
@@ -55,6 +68,12 @@ class DashboardViewModel {
 
         }
 
+    }
+
+    private fun setStateToLoading() {
+        state.update { currentState ->
+            currentState.copy(loadingState = LoadingState.Loading)
+        }
     }
 
 }
@@ -69,7 +88,7 @@ sealed class DashBoardScreenEvent {
 }
 
 data class DashBoardScreenState(
-    val isLoading: Boolean = true,
+    val loadingState: LoadingState = LoadingState.Loading,
     val dashboardMetrics: DashboardMetrics? = null,
     val exception: Exception? = null
 )

@@ -1,6 +1,7 @@
 package applicationInfo
 
 import client.ActuatorRemoteClient
+import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.info.*
@@ -16,7 +17,7 @@ class ApplicationInfoViewModel {
 
     fun onEvent(event: ApplicationInfoScreenEvent) {
         when (event) {
-            is ApplicationInfoScreenEvent.GetApplictionInfo -> getApplicationInfo(
+            is ApplicationInfoScreenEvent.GetApplicationInfo -> getApplicationInfo(
                 application = event.application,
                 scope = event.scope
             )
@@ -26,16 +27,19 @@ class ApplicationInfoViewModel {
     private fun getApplicationInfo(application: Application, scope: CoroutineScope) {
         scope.launch {
             when (val appInfoFromApi = ActuatorRemoteClient.getApplicationInfo(application)) {
-                is GetDataResult.Sucess -> {
+                is GetDataResult.Success -> {
                     val appInfo: ApplicationInfo? = appInfoFromApi.data
                     state.update { currentState ->
-                        currentState.copy(isLoading = false, applicationInfo = appInfo)
+                        currentState.copy(loadingState = LoadingState.SuccessLoading, applicationInfo = appInfo)
                     }
                 }
 
                 is GetDataResult.Failure -> {
                     state.update { currentState ->
-                        currentState.copy(isLoading = false, exception = appInfoFromApi.exception)
+                        currentState.copy(
+                            loadingState = LoadingState.FailedToLoad,
+                            exception = appInfoFromApi.exception
+                        )
                     }
                 }
             }
@@ -45,7 +49,7 @@ class ApplicationInfoViewModel {
 }
 
 data class ApplicationInfoScreenState(
-    val isLoading: Boolean = true,
+    val loadingState: LoadingState = LoadingState.Loading,
     val applicationInfo: ApplicationInfo? = null,
     val exception: Exception? = null
 ) {
@@ -154,6 +158,6 @@ data class ApplicationInfoScreenState(
 }
 
 sealed class ApplicationInfoScreenEvent {
-    data class GetApplictionInfo(val application: Application, val scope: CoroutineScope) :
+    data class GetApplicationInfo(val application: Application, val scope: CoroutineScope) :
         ApplicationInfoScreenEvent()
 }

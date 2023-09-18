@@ -1,9 +1,11 @@
 package httpRequests
 
 import client.ActuatorRemoteClient
+import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.HttpTrace
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -11,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class HttpTraceViewModel {
 
+    private val logger = KotlinLogging.logger { }
     var state = MutableStateFlow(HttpTraceScreenState())
         private set
 
@@ -26,23 +29,28 @@ class HttpTraceViewModel {
 
     private fun getAllTraces(application: Application, coroutineScope: CoroutineScope) {
 
-        state.update { currentState ->
-            currentState.copy(isLoading = true)
-        }
+        setStateToLoading()
 
         coroutineScope.launch {
             ActuatorRemoteClient.getHttpTraces(application)
                 .collect { traceResponse ->
+                    logger.info { "trace response: $traceResponse" }
                     when (traceResponse) {
-                        is GetDataResult.Sucess -> {
+                        is GetDataResult.Success -> {
                             state.update { currentState ->
-                                currentState.copy(isLoading = false, httpTraces = traceResponse.data ?: emptyList())
+                                currentState.copy(
+                                    loadingState = LoadingState.SuccessLoading,
+                                    httpTraces = traceResponse.data ?: emptyList()
+                                )
                             }
                         }
 
                         is GetDataResult.Failure -> {
                             state.update { currentState ->
-                                currentState.copy(isLoading = false, error = traceResponse.exception)
+                                currentState.copy(
+                                    loadingState = LoadingState.FailedToLoad,
+                                    error = traceResponse.exception
+                                )
                             }
                         }
                     }
@@ -51,11 +59,19 @@ class HttpTraceViewModel {
         }
 
     }
+
+    private fun setStateToLoading() {
+        state.update { currentState ->
+            currentState.copy(loadingState = LoadingState.Loading)
+        }
+    }
+
+
 }
 
 
 data class HttpTraceScreenState(
-    val isLoading: Boolean = false,
+    val loadingState: LoadingState = LoadingState.Loading,
     val httpTraces: List<HttpTrace> = emptyList(),
     val error: Exception? = null
 )

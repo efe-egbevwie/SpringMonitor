@@ -19,13 +19,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import common.ui.composables.RefreshButton
+import common.ui.composables.TableCell
+import common.ui.composables.screens.ErrorScreen
+import common.ui.composables.screens.LoadingScreen
+import common.ui.models.LoadingState
+import common.ui.sampleHttpTrace
 import domain.models.Application
 import domain.models.HttpTrace
 import domain.models.TraceRequest
 import domain.models.TraceResponse
-import common.ui.composables.RefreshButton
-import common.ui.composables.TableCell
-import common.ui.sampleHttpTrace
 import kotlinx.coroutines.cancelChildren
 import theme.SpringMonitorTheme
 
@@ -43,7 +46,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
         mutableStateOf(HttpTraceViewModel())
     }
 
-    val state = viewModel.state.collectAsState()
+    val state: HttpTraceScreenState by viewModel.state.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -69,17 +72,16 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        when (state.loadingState) {
+            is LoadingState.Loading -> LoadingScreen()
+            is LoadingState.SuccessLoading -> HttpTraceList(
+                modifier = Modifier.fillMaxSize(),
+                httpTraces = state.httpTraces,
+            )
 
-            if (state.value.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (state.value.httpTraces.isNotEmpty()) {
-                HttpTraceList(
-                    modifier = Modifier.fillMaxSize(),
-                    httpTraces = state.value.httpTraces,
-                )
-            }
+            is LoadingState.FailedToLoad -> ErrorScreen(exception = state.error)
         }
+
     }
 
 
