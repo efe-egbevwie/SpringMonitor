@@ -105,26 +105,24 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
 
     Box {
 
-        Column(modifier = modifier.padding(end = 16.dp)) {
-            LazyColumn(state = listState) {
-                stickyHeader {
-                    Row(
-                        modifier = Modifier.background(
-                            color = MaterialTheme.colorScheme.background,
-                            shape = RoundedCornerShape(corner = CornerSize(8.dp))
-                        )
-                    ) {
-                        TableCell(text = "Request Method", weight = 2F)
-                        TableCell(text = "URL", weight = 3F)
-                        TableCell(text = "Time stamp", weight = 3F)
-                        TableCell(text = "Status", weight = 1F)
+        LazyColumn(state = listState, modifier = modifier.padding(end = 16.dp)) {
+            stickyHeader {
+                Row(
+                    modifier = Modifier.background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(corner = CornerSize(8.dp))
+                    )
+                ) {
+                    TableCell(text = "Request Method", weight = 2F)
+                    TableCell(text = "URL", weight = 3F)
+                    TableCell(text = "Time stamp", weight = 3F)
+                    TableCell(text = "Status", weight = 1F)
 
-                    }
                 }
+            }
 
-                items(currentList.distinct(), key = { trace -> trace }) { trace ->
-                    HttpTraceItem(httpTrace = trace, modifier = Modifier)
-                }
+            items(currentList.distinct(), key = { trace -> trace }) { trace ->
+                HttpTraceItem(httpTrace = trace, modifier = Modifier)
             }
         }
 

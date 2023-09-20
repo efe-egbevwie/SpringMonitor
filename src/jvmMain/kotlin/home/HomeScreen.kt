@@ -21,6 +21,7 @@ import common.ui.sampleApplication
 import common.ui.sampleApplications
 import dashboard.DashboardScreen
 import domain.models.Application
+import environmentVariables.EnvironmentVariablesScreen
 import httpRequests.HttpRequestsScreen
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
@@ -256,6 +257,10 @@ fun ExpandedNavigationDrawer(
                                 ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
                             }
 
+                            Monitor.ENVIRONMENT -> {
+                                EnvironmentVariablesScreen(application = currentApplication)
+                            }
+
                             else -> {
                                 Text(
                                     "selected item is $selectedMonitor",
@@ -318,6 +323,10 @@ fun NavigationRailUi(
 
                 Monitor.HTTP -> {
                     HttpRequestsScreen(modifier = Modifier.padding(20.dp), application = currentApplication)
+                }
+
+                Monitor.ENVIRONMENT -> {
+                    EnvironmentVariablesScreen(application = currentApplication)
                 }
 
                 else -> {

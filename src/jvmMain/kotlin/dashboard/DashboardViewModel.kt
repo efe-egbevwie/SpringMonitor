@@ -30,7 +30,6 @@ class DashboardViewModel {
 
     private fun getDashBoardMetrics(application: Application, scope: CoroutineScope, fetchLiveUpdates: Boolean) {
 
-        setStateToLoading()
 
         scope.launch {
 
@@ -68,12 +67,6 @@ class DashboardViewModel {
 
         }
 
-    }
-
-    private fun setStateToLoading() {
-        state.update { currentState ->
-            currentState.copy(loadingState = LoadingState.Loading)
-        }
     }
 
 }

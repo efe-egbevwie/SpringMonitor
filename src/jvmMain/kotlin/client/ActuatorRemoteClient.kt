@@ -3,6 +3,8 @@ package client
 import client.models.ActuatorEndpoints
 import client.models.HttpTraceApiResponse
 import client.models.dashboard.*
+import client.models.environment.EnvironmentVariablesResponse
+import client.models.environment.getEnvVariables
 import client.models.info.ApplicationInfoResponse
 import client.models.info.toDomainAppInfo
 import client.models.toDomainHttptrace
@@ -10,6 +12,7 @@ import domain.exception.ActuatorNotEnabledException
 import domain.exception.BearerTokenNotValidException
 import domain.exception.CouldNotReachApplicationException
 import domain.models.*
+import domain.models.environment.EnvironmentVariable
 import domain.models.info.ApplicationInfo
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.call.*
@@ -286,6 +289,39 @@ object ActuatorRemoteClient {
 
             is GetDataResult.Failure -> {
                 GetDataResult.Failure(applicationInfoResponse.exception)
+            }
+        }
+
+
+    }
+
+    suspend fun getEnvironmentVariables(application: Application): GetDataResult<List<EnvironmentVariable>> {
+        val environmentVariablesResponse = executeAPiCall<EnvironmentVariablesResponse> {
+            ktorClient.get("${application.actuatorUrl}/env") {
+                headers {
+                    append("Authorization", "Bearer ${application.bearerToken}")
+                }
+            }
+
+        }
+
+        return when (environmentVariablesResponse) {
+            is GetDataResult.Success -> {
+
+                val envApiList =
+                    environmentVariablesResponse.data?.propertySources
+
+                if (envApiList?.isEmpty() == true || envApiList == null) return GetDataResult.Success(emptyList())
+
+
+                val envList: List<EnvironmentVariable> =
+                    envApiList.flatMap { property -> property.getEnvVariables() }
+
+                GetDataResult.Success(envList)
+            }
+
+            is GetDataResult.Failure -> {
+                GetDataResult.Failure(environmentVariablesResponse.exception)
             }
         }
 

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import applicationInfo.composables.ApplicationInfoCard
 import applicationInfo.models.ApplicationInfoForUi
 import common.ui.appInfoPreviewData
+import common.ui.composables.ScreenTitle
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
 import common.ui.models.LoadingState
@@ -53,12 +54,8 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
 fun ApplicationInfoScreenContent(modifier: Modifier = Modifier, appInfo: ApplicationInfoForUi) {
 
     Column(modifier = modifier) {
-        Text(
-            text = "Info",
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start
-        )
+
+       ScreenTitle(titleText = "Info")
 
         Spacer(modifier.height(8.dp))
 

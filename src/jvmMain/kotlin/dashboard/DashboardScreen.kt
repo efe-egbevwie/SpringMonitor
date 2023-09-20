@@ -6,6 +6,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import client.ActuatorRemoteClient
 import common.ui.composables.LiveUpdatesSwitch
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
@@ -37,6 +38,8 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
     LaunchedEffect(key1 = application, key2 = fetchLiveUpdates) {
         coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application, coroutineScope, fetchLiveUpdates))
+
+        ActuatorRemoteClient.getEnvironmentVariables(application)
     }
 
     when (state.loadingState) {
