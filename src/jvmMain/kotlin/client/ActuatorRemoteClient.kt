@@ -57,7 +57,7 @@ object ActuatorRemoteClient {
     }
 
     private fun saveApplicationDetails(application: Application) {
-        ActuatorLocalClient.insertApplication(application)
+        ApplicationsDb.insertApplication(application)
     }
 
     fun getLiveHttpTraces(application: Application, shouldFetchLiveUpdates: Boolean) = flow {

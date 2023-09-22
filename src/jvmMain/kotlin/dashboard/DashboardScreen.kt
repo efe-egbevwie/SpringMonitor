@@ -38,8 +38,6 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
     LaunchedEffect(key1 = application, key2 = fetchLiveUpdates) {
         coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application, coroutineScope, fetchLiveUpdates))
-
-        ActuatorRemoteClient.getEnvironmentVariables(application)
     }
 
     when (state.loadingState) {
@@ -71,7 +69,7 @@ fun DashBoardScreenContent(
 
     val scrollState = rememberScrollState()
 
-    Column(modifier = modifier.verticalScroll(scrollState)) {
+    Column(modifier = modifier.verticalScroll(scrollState).padding(bottom = 10.dp)) {
 
         LiveUpdatesSwitch(modifier = Modifier) {
             onFetchLiveUpdatesToggled(it)

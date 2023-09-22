@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import common.ui.composables.TableCell
 import domain.models.environment.EnvironmentVariable
@@ -37,7 +38,7 @@ fun EnvironmentVariableListUi(
     onItemActionClicked: (value: String) -> Unit
 ) {
     Column(modifier = modifier) {
-        EnvironmentVariableTableHeaderUi(modifier = Modifier.padding(10.dp))
+        EnvironmentVariableTableHeaderUi(modifier = modifier)
 
         LazyColumn(state = listState, modifier = modifier) {
 
@@ -45,7 +46,7 @@ fun EnvironmentVariableListUi(
                 EnvironmentVariableTableItemUi(
                     name = environmentVariable.name,
                     value = environmentVariable.value,
-                    modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 30.dp, bottom = 10.dp),
+                    modifier = modifier.padding(start = 6.dp, end = 10.dp, top = 10.dp, bottom = 10.dp),
                     onItemActionClicked = onItemActionClicked
                 )
             }
@@ -77,9 +78,9 @@ fun EnvironmentVariableTableItemUi(
 
     Box(modifier = modifier) {
         Row(modifier = modifier) {
-            Text(text = name, modifier = Modifier.weight(environmentVariableNameWeight))
+            Text(text = name, modifier = Modifier.weight(environmentVariableNameWeight), textAlign = TextAlign.Start)
 
-            Text(text = value, modifier = Modifier.weight(environmentVariableValueWeight))
+            Text(text = value, modifier = Modifier.weight(environmentVariableValueWeight), textAlign = TextAlign.Start)
 
             Icon(
                 imageVector = Icons.Filled.CopyAll,

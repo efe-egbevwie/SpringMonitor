@@ -14,15 +14,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import domain.models.Application
 import common.ui.sampleApplication
 import common.ui.sampleApplications
+import domain.models.Application
 import theme.SpringMonitorTheme
 
 @Composable
 @Preview
-fun ExistingApplicationsUi(
+fun ExistingApplicationListsUi(
     applications: List<Application>,
     modifier: Modifier = Modifier,
     onApplicationItemClicked: (Application) -> Unit,
@@ -62,22 +63,30 @@ fun ApplicationItem(
 ) {
     Column(modifier.padding(8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon")
 
-            Text(text = application.alias, style = MaterialTheme.typography.titleMedium)
+            Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon", modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = application.alias,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(2f)
+            )
+
+            Spacer(modifier = Modifier.width(20.dp))
 
             IconButton(
                 onClick = {
                     onEditApplicationClicked(application)
                 },
-                modifier = Modifier.align(Alignment.Top)
+                modifier = Modifier.align(Alignment.Top).weight(1f)
             ) {
                 Icon(Icons.Filled.Edit, contentDescription = "Edit Application")
             }
 
             IconButton(
+                modifier = Modifier.weight(1f),
                 onClick = {
                     onDeleteApplicationClicked(application)
                 }
@@ -117,7 +126,7 @@ fun ApplicationItemPreview() {
 fun ExistingApplicationsUiPreview() {
     SpringMonitorTheme {
         Surface {
-            ExistingApplicationsUi(
+            ExistingApplicationListsUi(
                 applications = sampleApplications,
                 onApplicationItemClicked = { },
                 onEditApplicationClicked = {},

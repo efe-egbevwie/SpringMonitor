@@ -13,7 +13,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import client.ActuatorLocalClient
+import client.ApplicationsDb
 import domain.models.Application
 import common.ui.composables.DeleteApplicationDialog
 import common.ui.composables.EditApplicationDialog
@@ -21,7 +21,7 @@ import common.ui.sampleApplications
 import home.HomeScreenDestination
 import io.github.oshai.kotlinlogging.KotlinLogging
 import setupApplication.composables.ActuatorDetails
-import setupApplication.composables.ExistingApplicationsUi
+import setupApplication.composables.ExistingApplicationListsUi
 import setupApplication.composables.HomeScreenDescription
 import theme.SpringMonitorTheme
 
@@ -39,7 +39,7 @@ object SetUpScreenDestination : Screen {
         }
 
         LaunchedEffect(1) {
-            ActuatorLocalClient.getAllApplications.collect { applications ->
+            ApplicationsDb.getAllApplications.collect { applications ->
                 existingApplications.clear()
                 existingApplications.addAll(applications)
                 logger.info { "existing apps are: $applications" }
@@ -61,6 +61,7 @@ object SetUpScreenDestination : Screen {
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SetUpScreen(
     existingApplications: List<Application>,
@@ -100,7 +101,7 @@ fun SetUpScreen(
 
                 Spacer(modifier = Modifier.height(40.dp))
 
-                ExistingApplicationsUi(
+                ExistingApplicationListsUi(
                     applications = existingApplications,
                     onApplicationItemClicked = { application ->
                         onApplicationItemClicked(application)
@@ -115,7 +116,7 @@ fun SetUpScreen(
                     },
                     modifier = Modifier
                         .fillMaxHeight(0.3f)
-                        .fillMaxWidth(0.2f)
+                        .fillMaxWidth(0.3f)
                         .padding(bottom = 20.dp)
                 )
 
@@ -161,7 +162,7 @@ fun SetUpScreen(
             isDialogVisible = showEditAppDialog,
             onSetUpButtonClicked = { newApplication ->
                 logger.info { "new app is : $newApplication" }
-                ActuatorLocalClient.updateApplication(application = newApplication)
+                ApplicationsDb.updateApplication(application = newApplication)
                 showEditAppDialog = false
             },
             onDialogClosed = {
@@ -178,7 +179,7 @@ fun SetUpScreen(
                 showDeleteApplicationDialog = false
             },
             onConfirm = {applicationId ->
-                ActuatorLocalClient.deleteApplication(applicationId)
+                ApplicationsDb.deleteApplication(applicationId)
                 showDeleteApplicationDialog = false
             }
         )
@@ -190,7 +191,7 @@ fun SetUpScreen(
 }
 
 private fun navigateToDashBoard(navigator: Navigator, newApplication: Application) {
-    navigator.replace(HomeScreenDestination(selectedApplication = newApplication))
+    navigator.replace(HomeScreenDestination(selectedApplicationId = newApplication.applicationId!!))
 }
 
 

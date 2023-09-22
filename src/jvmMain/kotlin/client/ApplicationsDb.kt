@@ -6,17 +6,19 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.efe.applications
 import comefe.ApplicationQueries
-import comefe.Applications
 import domain.models.Application
 import domain.models.toDomainApplication
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
 
-object ActuatorLocalClient {
+object ApplicationsDb {
 
     private val dbDriver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:applications.db")
+
+    private val logger = KotlinLogging.logger { }
 
     init {
         if (!File("applications.db").exists()) {
@@ -49,9 +51,11 @@ object ActuatorLocalClient {
         )
     }
 
-    fun findApplicationById(applicationId: Int) {
-        val application: List<Applications> =
-            applicationQueries.findApplicationById(applicationId.toLong()).executeAsList()
+    fun findApplicationById(applicationId: Int): Flow<Application?> {
+        return applicationQueries.findApplicationById(applicationId.toLong()).asFlow().map { applicationEntity ->
+            applicationEntity.executeAsOneOrNull()?.toDomainApplication()
+        }
+
     }
 
     fun updateApplication(application: Application) {

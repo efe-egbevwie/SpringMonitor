@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import common.ui.composables.RefreshButton
+import common.ui.composables.ScreenTitle
 import common.ui.composables.TableCell
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
@@ -66,9 +68,10 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.Start) {
 
-        RefreshButton {
-            refreshHttpTraces = true
-        }
+        ScreenTitle(
+            titleText = "Http Trace",
+            iconVector = Icons.Filled.Refresh,
+            onIconClicked = { refreshHttpTraces = true })
 
         Spacer(modifier = Modifier.height(10.dp))
 

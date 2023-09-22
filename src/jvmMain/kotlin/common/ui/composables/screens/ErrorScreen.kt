@@ -27,24 +27,30 @@ fun ErrorScreen(exception: Exception?, modifier: Modifier = Modifier) {
         else -> "Failed to perform operation"
     }
 
-    Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize().padding(20.dp)) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Filled.ArrowCircleDown,
-                contentDescription = "Error image",
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.fillMaxSize(0.3f)
-            )
+    SpringMonitorTheme {
+        Surface {
+            Box(contentAlignment = Alignment.Center, modifier = modifier.fillMaxSize().padding(20.dp)) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowCircleDown,
+                        contentDescription = "Error image",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxSize(0.3f)
+                    )
 
-            Spacer(modifier.height(20.dp))
+                    Spacer(modifier.height(20.dp))
 
-            Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.error
-            )
+                    Text(
+                        text = errorMessage,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
+
+
 
 }
 

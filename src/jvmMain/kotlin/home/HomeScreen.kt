@@ -13,47 +13,73 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import applicationInfo.ApplicationInfoScreen
 import cafe.adriel.voyager.core.screen.Screen
-import client.ActuatorLocalClient
+import client.ApplicationsDb
 import common.ui.composables.ApplicationsDropDownItem
 import common.ui.composables.DeleteApplicationDialog
 import common.ui.composables.EditApplicationDialog
+import common.ui.composables.screens.ErrorScreen
+import common.ui.composables.screens.LoadingScreen
+import common.ui.models.LoadingState
 import common.ui.sampleApplication
 import common.ui.sampleApplications
 import dashboard.DashboardScreen
 import domain.models.Application
 import environmentVariables.EnvironmentVariablesScreen
 import httpRequests.HttpRequestsScreen
+import io.github.oshai.kotlinlogging.KotlinLogging
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
 
 
-data class HomeScreenDestination(val selectedApplication: Application) : Screen {
+data class HomeScreenDestination(val selectedApplicationId: Int) : Screen {
+
+    private val logger = KotlinLogging.logger { }
+
     @Composable
     override fun Content() {
 
-        var currentApplication by remember {
-            mutableStateOf(selectedApplication)
+        var currentApplicationId by remember {
+            mutableStateOf(selectedApplicationId)
         }
 
-        println("current app is $currentApplication")
+        val scope = rememberCoroutineScope()
+
+        logger.info { "current app ID is $selectedApplicationId" }
+
 
         val viewModel by remember {
             mutableStateOf(HomeScreenViewModel())
         }
 
-        LaunchedEffect(1) {
+        LaunchedEffect(key1 = currentApplicationId) {
+            viewModel.onEvent(HomeScreenEvent.GetSelectedApplication(applicationId = currentApplicationId, scope))
+        }
+
+        LaunchedEffect(key1 = Unit) {
             viewModel.onEvent(HomeScreenEvent.GetAllApplications)
         }
 
-        val state = viewModel.state.collectAsState()
+        val state by viewModel.state.collectAsState()
+        logger.info { "viewModel state -> $state" }
 
-        HomeScreen(
-            selectedApplication = currentApplication,
-            allApplications = state.value.allApplications,
-            onApplicationSelected = { newApplication ->
-                currentApplication = newApplication
+        when (state.loadingState) {
+            LoadingState.Loading -> LoadingScreen()
+            LoadingState.SuccessLoading -> {
+
+                if (state.currentApplication != null) {
+                    HomeScreen(
+                        selectedApplication = state.currentApplication!!,
+                        allApplications = state.allApplications,
+                        onApplicationSelected = { selectedApplication ->
+                            currentApplicationId = selectedApplication.applicationId!!
+                        }
+                    )
+                }
+
             }
-        )
+
+            is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
+        }
     }
 
 }
@@ -165,7 +191,7 @@ fun HomeScreen(
             EditApplicationDialog(
                 isDialogVisible = showEditApplicationDialog,
                 onSetUpButtonClicked = { newApplication ->
-                    ActuatorLocalClient.updateApplication(application = newApplication)
+                    ApplicationsDb.updateApplication(application = newApplication)
                     showEditApplicationDialog = false
                 },
                 onDialogClosed = {
@@ -182,7 +208,7 @@ fun HomeScreen(
                     showDeleteApplicationDialog = false
                 },
                 onConfirm = { applicationId ->
-                    ActuatorLocalClient.deleteApplication(applicationId)
+                    ApplicationsDb.deleteApplication(applicationId)
                     showDeleteApplicationDialog = false
                 }
             )
