@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,6 +54,7 @@ fun ExistingApplicationListsUi(
 
 }
 
+
 @Composable
 fun ApplicationItem(
     application: Application,
@@ -62,7 +64,7 @@ fun ApplicationItem(
     showDropDownArrow: Boolean = false
 ) {
     Column(modifier.padding(8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically,) {
 
             Icon(imageVector = Icons.Filled.Cloud, contentDescription = "Server icon", modifier = Modifier.weight(1f))
 
@@ -74,7 +76,7 @@ fun ApplicationItem(
                 modifier = Modifier.weight(2f)
             )
 
-            Spacer(modifier = Modifier.width(20.dp))
+//            Spacer(modifier = Modifier.width(8.dp))
 
             IconButton(
                 onClick = {

@@ -6,8 +6,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import client.ActuatorRemoteClient
 import common.ui.composables.LiveUpdatesSwitch
+import common.ui.composables.ScreenTitle
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
 import common.ui.models.LoadingState
@@ -40,21 +40,29 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
         viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application, coroutineScope, fetchLiveUpdates))
     }
 
-    when (state.loadingState) {
-        is LoadingState.Loading -> LoadingScreen()
-        is LoadingState.SuccessLoading -> {
-            if (dashBoardMetrics == null) return
+    Column(modifier = modifier.fillMaxSize()) {
 
-            DashBoardScreenContent(
-                modifier = modifier.padding(start = 20.dp, end = 20.dp),
-                metrics = dashBoardMetrics,
-                onFetchLiveUpdatesToggled = {
-                    fetchLiveUpdates = it
-                }
-            )
+        ScreenTitle(titleText = "Dashboard")
+
+        Spacer(Modifier.height(10.dp))
+
+
+        when (state.loadingState) {
+            is LoadingState.Loading -> LoadingScreen()
+            is LoadingState.SuccessLoading -> {
+                if (dashBoardMetrics == null) return
+
+                DashBoardScreenContent(
+                    modifier = modifier.padding(end = 20.dp),
+                    metrics = dashBoardMetrics,
+                    onFetchLiveUpdatesToggled = {
+                        fetchLiveUpdates = it
+                    }
+                )
+            }
+
+            is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
         }
-
-        is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
     }
 
 
@@ -69,6 +77,7 @@ fun DashBoardScreenContent(
 
     val scrollState = rememberScrollState()
 
+
     Column(modifier = modifier.verticalScroll(scrollState).padding(bottom = 10.dp)) {
 
         LiveUpdatesSwitch(modifier = Modifier) {
@@ -80,7 +89,10 @@ fun DashBoardScreenContent(
         Row(modifier = Modifier) {
             ApplicationStatusCard(modifier = Modifier.weight(1f), appStatus = "Up")
             Spacer(modifier = Modifier.width(20.dp))
-            ApplicationUpTimeUi(modifier = Modifier.weight(1f), upTime = metrics.upTime?.getFormattedTime().orEmpty())
+            ApplicationUpTimeUi(
+                modifier = Modifier.weight(1f),
+                upTime = metrics.upTime?.getFormattedTime().orEmpty()
+            )
         }
 
 

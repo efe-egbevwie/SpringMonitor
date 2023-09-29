@@ -44,7 +44,25 @@ data class DashboardMetrics(
 @JvmInline
 value class ProcessUpTime(private val time: Duration) {
     fun getFormattedTime(): String {
-        return this.time.toString()
+        val timeStamp = StringBuilder()
+        time.toComponents { days, hours, minutes, seconds, nanoseconds ->
+            if (days != 0L) {
+                timeStamp.append("$days Days ")
+            }
+
+            if (hours != 0) {
+                timeStamp.append("$hours hours ")
+            }
+
+            if (minutes != 0) {
+                timeStamp.append("$minutes minutes ")
+            }
+
+            if (seconds != 0) {
+                timeStamp.append("$seconds seconds")
+            }
+        }
+        return timeStamp.toString()
     }
 }
 

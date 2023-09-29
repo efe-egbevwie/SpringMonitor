@@ -1,5 +1,7 @@
 package home
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -222,7 +224,7 @@ fun HomeScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun ExpandedNavigationDrawer(
     modifier: Modifier = Modifier,
@@ -269,31 +271,34 @@ fun ExpandedNavigationDrawer(
 
                     Spacer(modifier = Modifier.width(10.dp))
 
-                    Box(modifier = modifier.fillMaxSize().padding(start = 8.dp)) {
-                        when (selectedMonitor) {
-                            Monitor.DASHBOARD -> {
-                                DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
-                            }
+                    Box(modifier = modifier.fillMaxSize().padding(start = 4.dp)) {
+                        AnimatedContent (targetState = selectedMonitor){
+                            when (selectedMonitor) {
+                                Monitor.DASHBOARD -> {
+                                    DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
+                                }
 
-                            Monitor.HTTP -> {
-                                HttpRequestsScreen(application = currentApplication, modifier = Modifier.padding(20.dp))
-                            }
+                                Monitor.HTTP -> {
+                                    HttpRequestsScreen(application = currentApplication, modifier = Modifier)
+                                }
 
-                            Monitor.INFO -> {
-                                ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
-                            }
+                                Monitor.INFO -> {
+                                    ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
+                                }
 
-                            Monitor.ENVIRONMENT -> {
-                                EnvironmentVariablesScreen(application = currentApplication)
-                            }
+                                Monitor.ENVIRONMENT -> {
+                                    EnvironmentVariablesScreen(application = currentApplication)
+                                }
 
-                            else -> {
-                                Text(
-                                    "selected item is $selectedMonitor",
-                                    modifier = Modifier.align(Alignment.TopStart)
-                                )
+                                else -> {
+                                    Text(
+                                        "selected item is $selectedMonitor",
+                                        modifier = Modifier.align(Alignment.TopStart)
+                                    )
+                                }
                             }
                         }
+
                     }
                 }
 

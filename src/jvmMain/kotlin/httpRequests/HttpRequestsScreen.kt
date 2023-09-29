@@ -78,7 +78,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
         when (state.loadingState) {
             is LoadingState.Loading -> LoadingScreen()
             is LoadingState.SuccessLoading -> HttpTraceList(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(end = 16.dp),
                 httpTraces = state.httpTraces,
             )
 
@@ -108,7 +108,7 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
 
     Box {
 
-        LazyColumn(state = listState, modifier = modifier.padding(end = 16.dp)) {
+        LazyColumn(state = listState, modifier = modifier) {
             stickyHeader {
                 Row(
                     modifier = Modifier.background(

@@ -37,15 +37,23 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
 
     val state: ApplicationInfoScreenState by viewModel.state.collectAsState()
 
-    when (state.loadingState) {
-        is LoadingState.Loading -> LoadingScreen()
-        is LoadingState.SuccessLoading -> ApplicationInfoScreenContent(
-            modifier = modifier,
-            appInfo = state.buildAppInfoForUi()
-        )
+    Column(modifier = modifier.fillMaxSize()) {
 
-        is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
+        ScreenTitle(titleText = "Info")
+
+        Spacer(modifier.height(8.dp))
+
+        when (state.loadingState) {
+            is LoadingState.Loading -> LoadingScreen()
+            is LoadingState.SuccessLoading -> ApplicationInfoScreenContent(
+                modifier = modifier,
+                appInfo = state.buildAppInfoForUi()
+            )
+
+            is LoadingState.FailedToLoad -> ErrorScreen(exception = state.exception)
+        }
     }
+
 
 }
 
@@ -53,29 +61,21 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
 @Composable
 fun ApplicationInfoScreenContent(modifier: Modifier = Modifier, appInfo: ApplicationInfoForUi) {
 
-    Column(modifier = modifier) {
+    FlowColumn(
+        verticalArrangement = Arrangement.Top,
+        maxItemsInEachColumn = 2,
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+    ) {
 
-       ScreenTitle(titleText = "Info")
-
-        Spacer(modifier.height(8.dp))
-
-        FlowColumn(
-            verticalArrangement = Arrangement.Top,
-            maxItemsInEachColumn = 2,
-            modifier = modifier
-                .verticalScroll(rememberScrollState())
-        ) {
-
-            appInfo.forEach { infoItem ->
+        appInfo.forEach { infoItem ->
 
 
-                ApplicationInfoCard(
-                    infoItems = infoItem.value,
-                    infoTitle = infoItem.key,
-                    modifier = Modifier.fillMaxWidth(0.5f).padding(top = 10.dp, end = 10.dp, bottom = 10.dp)
-                )
-            }
-
+            ApplicationInfoCard(
+                infoItems = infoItem.value,
+                infoTitle = infoItem.key,
+                modifier = Modifier.fillMaxWidth(0.5f).padding(top = 10.dp, end = 10.dp, bottom = 10.dp)
+            )
         }
 
     }

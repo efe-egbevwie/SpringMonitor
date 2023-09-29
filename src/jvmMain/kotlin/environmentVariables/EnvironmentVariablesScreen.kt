@@ -1,5 +1,6 @@
 package environmentVariables
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ScrollbarStyle
 import androidx.compose.foundation.VerticalScrollbar
@@ -61,8 +62,9 @@ fun EnvironmentVariablesScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .wrapContentHeight()
+                .animateContentSize(),
+            verticalAlignment = Alignment.Top
         ) {
             ScreenTitle(
                 titleText = "Environment Variables",
@@ -91,7 +93,7 @@ fun EnvironmentVariablesScreen(
             is LoadingState.Loading -> LoadingScreen()
             is LoadingState.SuccessLoading ->
                 EnvironmentVariablesScreenContent(
-                    modifier = modifier,
+                    modifier = modifier.padding(end = 16.dp),
                     environmentVariables = state.environmentVariables,
                     onCopyValueItemClicked = { value ->
                         copyEnvironmentVariableToClipBoard(value)
@@ -135,7 +137,7 @@ fun EnvironmentVariablesScreenContent(
                 hoverColor = MaterialTheme.colorScheme.primary
 
             ),
-            modifier = modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp),
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp),
             adapter = rememberScrollbarAdapter(
                 scrollState = listState
             )
@@ -147,8 +149,8 @@ fun EnvironmentVariablesScreenContent(
 @Composable
 fun ValueCopiedSnackBar(
     showSnackBar: Boolean,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDismiss: () -> Unit
 ) {
 
     if (!showSnackBar) return
