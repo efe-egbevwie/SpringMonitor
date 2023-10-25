@@ -1,6 +1,7 @@
 package setupApplication
 
 import client.ActuatorRemoteClient
+import client.ApplicationsDb
 import client.models.ActuatorEndpoints
 import domain.models.Application
 import domain.models.GetDataResult
@@ -38,12 +39,15 @@ class SetUpScreenViewModel {
             when (result) {
                 is GetDataResult.Success -> {
 
+                    val newApplicationId = saveApplicationAndGetId(application)
+                    val newApplication = application.copy(applicationId = newApplicationId.toInt())
+
                     state.update { currentState ->
                         currentState.copy(
                             isLoading = false,
                             actuatorEndpoints = result.data,
                             getActuatorSuccess = true,
-                            newApplication = application
+                            newApplication = newApplication
                         )
                     }
                 }
@@ -57,6 +61,10 @@ class SetUpScreenViewModel {
 
         }
 
+    }
+
+    private fun saveApplicationAndGetId(application: Application): Long {
+        return ApplicationsDb.insertApplication(application)
     }
 }
 

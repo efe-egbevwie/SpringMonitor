@@ -53,12 +53,15 @@ object ApplicationsDb {
             }
 
 
-    fun insertApplication(application: Application) {
-        applicationQueries.insertApplication(
-            application_alias = application.alias,
-            actuator_url = application.actuatorUrl,
-            bearer_token = application.bearerToken
-        )
+    fun insertApplication(application: Application): Long {
+        return applicationQueries.transactionWithResult {
+            applicationQueries.insertApplication(
+                application_alias = application.alias,
+                actuator_url = application.actuatorUrl,
+                bearer_token = application.bearerToken
+            ).executeAsOne()
+        }
+
     }
 
     fun findApplicationById(applicationId: Int): Flow<Application?> {

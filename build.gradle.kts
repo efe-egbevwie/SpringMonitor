@@ -97,6 +97,12 @@ compose.desktop {
             packageName = "SpringMonitor"
             packageVersion = "1.0.0"
             modules("java.sql")
+
+            windows{
+                dirChooser = true
+                shortcut = true
+                menu = true
+            }
         }
     }
 }

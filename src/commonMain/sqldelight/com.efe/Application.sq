@@ -13,9 +13,11 @@ selectAll:
 SELECT *
 FROM applications;
 
-insertApplication:
+insertApplication{
 INSERT INTO applications(application_alias, actuator_url, bearer_token)
 VALUES (?, ?, ?);
+SELECT last_insert_rowid();
+}
 
 findApplicationById:
 SELECT * FROM applications WHERE application_id = ?;

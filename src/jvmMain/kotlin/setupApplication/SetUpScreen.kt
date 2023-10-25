@@ -61,7 +61,6 @@ object SetUpScreenDestination : Screen {
 
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SetUpScreen(
     existingApplications: List<Application>,
