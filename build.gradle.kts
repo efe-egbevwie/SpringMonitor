@@ -22,6 +22,8 @@ kotlin {
         withJava()
     }
     sourceSets {
+        val sqlDelightVersion = "2.0.0"
+
 
         val commonMain by getting{
             dependencies{
@@ -40,7 +42,6 @@ kotlin {
                 val ktorVersion = "2.3.3"
                 val coroutinesVersion = "1.7.1"
                 val logbackVersion = "1.4.11"
-                val sqlDelightVersion = "2.0.0"
 
 
 
@@ -83,11 +84,19 @@ kotlin {
 
 compose.desktop {
     application {
+
+        buildTypes.release {
+            proguard {
+                configurationFiles.from("compose-desktop.pro")
+            }
+        }
+
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "SpringMonitor"
             packageVersion = "1.0.0"
+            modules("java.sql")
         }
     }
 }

@@ -9,7 +9,7 @@ import androidx.compose.ui.unit.sp
 
 val fontFamily = FontFamily(
     Font(resource = "font/sf-pro-text-bold.ttf", weight = FontWeight.Bold),
-    Font(resource = "font/sf-pro-text-Semibold.otf", weight = FontWeight.SemiBold),
+    Font(resource = "font/SF-Pro-text-Semibold.otf", weight = FontWeight.SemiBold),
     Font(resource = "font/sf-pro-text-heavy.ttf", weight = FontWeight.ExtraBold),
     Font(resource = "font/sf-pro-text-medium.ttf", weight = FontWeight.Medium),
     Font(resource = "font/sf-pro-text-regular.ttf", weight = FontWeight.Normal)

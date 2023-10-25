@@ -76,6 +76,7 @@ fun SetUpScreen(
 
     val setUpSuccess = setUpScreenState.value.getActuatorSuccess
     val newApplication = setUpScreenState.value.newApplication
+
     if (setUpSuccess && newApplication != null) {
         onSetUpSuccess(newApplication)
     }

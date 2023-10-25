@@ -47,19 +47,19 @@ value class ProcessUpTime(private val time: Duration) {
         val timeStamp = StringBuilder()
         time.toComponents { days, hours, minutes, seconds, nanoseconds ->
             if (days != 0L) {
-                timeStamp.append("$days Days ")
+                if (days >= 1) timeStamp.append("${days}D ") else timeStamp.append("${days}D ")
             }
 
             if (hours != 0) {
-                timeStamp.append("$hours hours ")
+                timeStamp.append("${hours}H ")
             }
 
             if (minutes != 0) {
-                timeStamp.append("$minutes minutes ")
+                timeStamp.append("${minutes}m ")
             }
 
             if (seconds != 0) {
-                timeStamp.append("$seconds seconds")
+                timeStamp.append("${seconds}s")
             }
         }
         return timeStamp.toString()

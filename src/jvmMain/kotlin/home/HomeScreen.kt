@@ -404,11 +404,6 @@ fun AllApplicationsDropDown(
                                     }
                                 )
 
-//                                Divider(
-//                                    modifier = Modifier.height(2.dp).fillMaxWidth().padding(start = 2.dp, end = 2.dp)
-//                                )
-
-
                             }
 
                         }
@@ -418,6 +413,53 @@ fun AllApplicationsDropDown(
             }
 
         }
+    }
+}
+
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun NavigationContent(modifier: Modifier = Modifier, selectedMonitor: Monitor, application: Application) {
+    Surface(modifier.fillMaxWidth()) {
+        Row(modifier.fillMaxWidth()) {
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Divider(modifier = modifier.width(1.dp).fillMaxHeight())
+
+            Spacer(modifier = Modifier.width(10.dp))
+
+            Box(modifier = modifier.fillMaxSize().padding(start = 4.dp)) {
+                AnimatedContent (targetState = selectedMonitor){
+                    when (selectedMonitor) {
+                        Monitor.DASHBOARD -> {
+                            DashboardScreen(modifier = Modifier.fillMaxSize(), application = application)
+                        }
+
+                        Monitor.HTTP -> {
+                            HttpRequestsScreen(application = application, modifier = Modifier)
+                        }
+
+                        Monitor.INFO -> {
+                            ApplicationInfoScreen(modifier = Modifier, application = application)
+                        }
+
+                        Monitor.ENVIRONMENT -> {
+                            EnvironmentVariablesScreen(application = application)
+                        }
+
+                        else -> {
+                            Text(
+                                "selected item is $selectedMonitor",
+                                modifier = Modifier.align(Alignment.TopStart)
+                            )
+                        }
+                    }
+                }
+
+            }
+        }
+
     }
 }
 

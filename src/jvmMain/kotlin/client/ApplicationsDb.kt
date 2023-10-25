@@ -13,20 +13,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.io.File
+import kotlin.io.path.Path
 
 object ApplicationsDb {
 
-    private val dbDriver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:applications.db")
+    private val databasePath: String
+
+    private val dbDriver: SqlDriver
 
     private val logger = KotlinLogging.logger { }
 
     init {
-        if (!File("applications.db").exists()) {
+        val userHome = System.getProperty("user.home")
+
+        val databaseDirectory = Path(userHome).resolve(".SpringMonitor")
+        databaseDirectory.toFile().mkdirs()
+
+        databasePath = databaseDirectory.resolve("applications.db").toString()
+        dbDriver = JdbcSqliteDriver("jdbc:sqlite:$databasePath")
+
+        if (!File(databasePath).exists()) {
             applications.Schema.create(dbDriver)
         }
 
-        val filePath = File("applications.db").absolutePath
-        println("file path: $filePath")
+        logger.info { "file path: $databasePath" }
 
     }
 
