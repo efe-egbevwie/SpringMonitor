@@ -5,6 +5,8 @@ import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.info.*
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.oshai.kotlinlogging.withLoggingContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,17 +16,26 @@ class ApplicationInfoViewModel {
 
     val state = MutableStateFlow(ApplicationInfoScreenState())
 
+    private val logger = KotlinLogging.logger { }
 
     fun onEvent(event: ApplicationInfoScreenEvent) {
         when (event) {
             is ApplicationInfoScreenEvent.GetApplicationInfo -> getApplicationInfo(
                 application = event.application,
-                scope = event.scope
+                scope = event.scope,
+                refresh = event.refresh
             )
         }
     }
 
-    private fun getApplicationInfo(application: Application, scope: CoroutineScope) {
+    private fun getApplicationInfo(application: Application, scope: CoroutineScope, refresh: Boolean = false) {
+
+        val applicationInfoAlreadyLoaded: Boolean = state.value.applicationInfo != null
+
+        if (applicationInfoAlreadyLoaded and !refresh) return
+
+        setStateToLoading()
+
         scope.launch {
             when (val appInfoFromApi = ActuatorRemoteClient.getApplicationInfo(application)) {
                 is GetDataResult.Success -> {
@@ -43,6 +54,12 @@ class ApplicationInfoViewModel {
                     }
                 }
             }
+        }
+    }
+
+    private fun setStateToLoading() {
+        state.update { currentState ->
+            currentState.copy(loadingState = LoadingState.Loading)
         }
     }
 
@@ -158,6 +175,10 @@ data class ApplicationInfoScreenState(
 }
 
 sealed class ApplicationInfoScreenEvent {
-    data class GetApplicationInfo(val application: Application, val scope: CoroutineScope) :
+    data class GetApplicationInfo(
+        val application: Application,
+        val scope: CoroutineScope,
+        val refresh: Boolean = false
+    ) :
         ApplicationInfoScreenEvent()
 }

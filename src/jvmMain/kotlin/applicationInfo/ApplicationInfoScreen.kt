@@ -1,13 +1,18 @@
 package applicationInfo
 
+import AppViewModels
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ReadMore
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -25,8 +30,8 @@ import theme.SpringMonitorTheme
 @Composable
 fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifier) {
 
-    val viewModel by remember {
-        mutableStateOf(ApplicationInfoViewModel())
+    val viewModel: ApplicationInfoViewModel by rememberSaveable {
+        mutableStateOf(AppViewModels.infoViewModel)
     }
 
     val scope = rememberCoroutineScope()
@@ -39,7 +44,13 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
 
     Column(modifier = modifier.fillMaxSize()) {
 
-        ScreenTitle(titleText = "Info")
+        ScreenTitle(
+            titleText = "Info",
+            iconVector = Icons.Filled.Refresh,
+            onRefreshIconClicked = {
+                viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application, scope, refresh = true))
+            }
+        )
 
         Spacer(modifier.height(8.dp))
 

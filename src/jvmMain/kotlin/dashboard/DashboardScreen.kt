@@ -1,9 +1,11 @@
 package dashboard
 
+import AppViewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import common.ui.composables.LiveUpdatesSwitch
@@ -22,8 +24,8 @@ import kotlinx.coroutines.cancelChildren
 @Composable
 fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
 
-    val viewModel by remember {
-        mutableStateOf(DashboardViewModel())
+    val viewModel:DashboardViewModel by rememberSaveable {
+        mutableStateOf(AppViewModels.dashBoardViewModel)
     }
 
     var fetchLiveUpdates by remember {

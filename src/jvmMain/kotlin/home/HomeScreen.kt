@@ -1,7 +1,5 @@
 package home
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -9,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -32,7 +31,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
 
-
 data class HomeScreenDestination(val selectedApplicationId: Int) : Screen {
 
     private val logger = KotlinLogging.logger { }
@@ -40,13 +38,11 @@ data class HomeScreenDestination(val selectedApplicationId: Int) : Screen {
     @Composable
     override fun Content() {
 
-        var currentApplicationId by remember {
+        var currentApplicationId by rememberSaveable {
             mutableStateOf(selectedApplicationId)
         }
 
         val scope = rememberCoroutineScope()
-
-        logger.info { "current app ID is $selectedApplicationId" }
 
 
         val viewModel by remember {
@@ -62,7 +58,7 @@ data class HomeScreenDestination(val selectedApplicationId: Int) : Screen {
         }
 
         val state by viewModel.state.collectAsState()
-        logger.info { "viewModel state -> $state" }
+
 
         when (state.loadingState) {
             LoadingState.Loading -> LoadingScreen()
@@ -97,15 +93,15 @@ fun HomeScreen(
 
         val defaultMonitor: Monitor = Monitor.DASHBOARD
 
-        var selectedMonitor by remember {
+        var selectedMonitor by rememberSaveable {
             mutableStateOf(defaultMonitor)
         }
 
-        var navigationExpanded by remember {
+        var navigationExpanded by rememberSaveable {
             mutableStateOf(true)
         }
 
-        var showAllApplicationsDropDown by remember {
+        var showAllApplicationsDropDown by rememberSaveable {
             mutableStateOf(false)
         }
 
@@ -224,7 +220,7 @@ fun HomeScreen(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpandedNavigationDrawer(
     modifier: Modifier = Modifier,
@@ -262,47 +258,12 @@ fun ExpandedNavigationDrawer(
 
         },
         content = {
-            Surface(modifier.fillMaxWidth()) {
-                Row(modifier.fillMaxWidth()) {
 
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Divider(modifier = modifier.width(1.dp).fillMaxHeight())
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    Box(modifier = modifier.fillMaxSize().padding(start = 4.dp)) {
-                        AnimatedContent (targetState = selectedMonitor){
-                            when (selectedMonitor) {
-                                Monitor.DASHBOARD -> {
-                                    DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
-                                }
-
-                                Monitor.HTTP -> {
-                                    HttpRequestsScreen(application = currentApplication, modifier = Modifier)
-                                }
-
-                                Monitor.INFO -> {
-                                    ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
-                                }
-
-                                Monitor.ENVIRONMENT -> {
-                                    EnvironmentVariablesScreen(application = currentApplication)
-                                }
-
-                                else -> {
-                                    Text(
-                                        "selected item is $selectedMonitor",
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                    )
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-            }
+            NavigationContent(
+                modifier = Modifier,
+                selectedMonitor = selectedMonitor,
+                currentApplication = currentApplication
+            )
         }
     )
 }
@@ -319,7 +280,7 @@ fun NavigationRailUi(
 ) {
 
 
-    Row(modifier = Modifier.fillMaxSize()) {
+    Row(modifier = modifier.fillMaxSize()) {
 
         NavigationRail(
             modifier = Modifier.wrapContentWidth().fillMaxHeight(),
@@ -342,33 +303,11 @@ fun NavigationRailUi(
         }
 
 
-        Divider(modifier = Modifier.width(1.dp).fillMaxHeight())
-
-
-        Box(modifier = Modifier.fillMaxSize().padding(start = 20.dp)) {
-            when (selectedMonitor) {
-
-                Monitor.DASHBOARD -> {
-                    DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
-                }
-
-                Monitor.HTTP -> {
-                    HttpRequestsScreen(modifier = Modifier.padding(20.dp), application = currentApplication)
-                }
-
-                Monitor.ENVIRONMENT -> {
-                    EnvironmentVariablesScreen(application = currentApplication)
-                }
-
-                else -> {
-                    Text(
-                        "selected item is $selectedMonitor",
-                        modifier = Modifier.align(Alignment.TopStart)
-                    )
-                }
-            }
-        }
-
+        NavigationContent(
+            modifier = Modifier,
+            selectedMonitor = selectedMonitor,
+            currentApplication = currentApplication
+        )
 
     }
 
@@ -417,9 +356,9 @@ fun AllApplicationsDropDown(
 }
 
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun NavigationContent(modifier: Modifier = Modifier, selectedMonitor: Monitor, application: Application) {
+fun NavigationContent(modifier: Modifier = Modifier, selectedMonitor: Monitor, currentApplication: Application) {
+
     Surface(modifier.fillMaxWidth()) {
         Row(modifier.fillMaxWidth()) {
 
@@ -429,38 +368,40 @@ fun NavigationContent(modifier: Modifier = Modifier, selectedMonitor: Monitor, a
 
             Spacer(modifier = Modifier.width(10.dp))
 
-            Box(modifier = modifier.fillMaxSize().padding(start = 4.dp)) {
-                AnimatedContent (targetState = selectedMonitor){
-                    when (selectedMonitor) {
-                        Monitor.DASHBOARD -> {
-                            DashboardScreen(modifier = Modifier.fillMaxSize(), application = application)
-                        }
+            Box(modifier = Modifier.fillMaxSize().padding(start = 4.dp)) {
 
-                        Monitor.HTTP -> {
-                            HttpRequestsScreen(application = application, modifier = Modifier)
-                        }
+                when (selectedMonitor) {
+                    Monitor.DASHBOARD -> {
+                        DashboardScreen(modifier = Modifier.fillMaxSize(), application = currentApplication)
+                    }
 
-                        Monitor.INFO -> {
-                            ApplicationInfoScreen(modifier = Modifier, application = application)
-                        }
+                    Monitor.HTTP -> {
+                        HttpRequestsScreen(application = currentApplication, modifier = Modifier)
+                    }
 
-                        Monitor.ENVIRONMENT -> {
-                            EnvironmentVariablesScreen(application = application)
-                        }
+                    Monitor.INFO -> {
+                        ApplicationInfoScreen(modifier = Modifier, application = currentApplication)
+                    }
 
-                        else -> {
-                            Text(
-                                "selected item is $selectedMonitor",
-                                modifier = Modifier.align(Alignment.TopStart)
-                            )
-                        }
+                    Monitor.ENVIRONMENT -> {
+                        EnvironmentVariablesScreen(application = currentApplication)
+                    }
+
+                    else -> {
+                        Text(
+                            "selected item is $selectedMonitor",
+                            modifier = Modifier.align(Alignment.TopStart)
+                        )
                     }
                 }
+
 
             }
         }
 
     }
+
+
 }
 
 enum class Monitor(val title: String) {

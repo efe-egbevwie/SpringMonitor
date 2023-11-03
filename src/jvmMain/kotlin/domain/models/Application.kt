@@ -1,7 +1,9 @@
 package domain.models
 
+import androidx.compose.runtime.Stable
 import comefe.Applications
 
+@Stable
 data class Application(
     val alias: String,
     val applicationId: Int? = null,

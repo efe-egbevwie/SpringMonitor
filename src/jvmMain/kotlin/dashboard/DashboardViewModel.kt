@@ -24,12 +24,15 @@ class DashboardViewModel {
                 scope = event.coroutineScope,
                 fetchLiveUpdates = event.fetchLiveUpdates
             )
+
         }
     }
 
 
     private fun getDashBoardMetrics(application: Application, scope: CoroutineScope, fetchLiveUpdates: Boolean) {
+        val dashboardDataAlreadyLoaded = state.value.dashboardMetrics != null
 
+        if (dashboardDataAlreadyLoaded and !fetchLiveUpdates) return
 
         scope.launch {
 

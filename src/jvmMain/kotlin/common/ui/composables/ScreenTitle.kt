@@ -22,7 +22,7 @@ fun ScreenTitle(
     modifier: Modifier = Modifier,
     titleText: String,
     iconVector: ImageVector? = null,
-    onIconClicked: () -> Unit = {}
+    onRefreshIconClicked: () -> Unit = {}
 ) {
 
     Row (verticalAlignment = Alignment.CenterVertically, modifier = modifier){
@@ -39,7 +39,7 @@ fun ScreenTitle(
             Icon(
                 imageVector = iconVector,
                 contentDescription = "Action icon",
-                modifier = Modifier.clickable { onIconClicked() })
+                modifier = Modifier.clickable { onRefreshIconClicked() })
         }
     }
 

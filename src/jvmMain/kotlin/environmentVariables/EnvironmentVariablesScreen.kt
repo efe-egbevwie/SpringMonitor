@@ -1,5 +1,6 @@
 package environmentVariables
 
+import AppViewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ScrollbarStyle
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,23 +39,21 @@ fun EnvironmentVariablesScreen(
 ) {
 
 
-    val viewModel by remember {
-        mutableStateOf(EnvironmentVariablesViewModel())
+    val viewModel by rememberSaveable {
+        mutableStateOf(AppViewModels.environmentVariableViewModel)
     }
 
     val state by viewModel.state.collectAsState()
 
     val scope = rememberCoroutineScope()
 
-    var refreshContent by remember {
-        mutableStateOf(false)
-    }
-
     var showValueCopiedSnackBar by remember {
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = application, key2 = refreshContent) {
+
+
+    LaunchedEffect(key1 = application) {
         viewModel.onEvent(EnvironmentVariablesScreenEvent.GetEnvironmentVariables(application, scope))
     }
 
@@ -69,8 +69,8 @@ fun EnvironmentVariablesScreen(
             ScreenTitle(
                 titleText = "Environment Variables",
                 iconVector = Icons.Filled.Refresh,
-                onIconClicked = {
-                    refreshContent = true
+                onRefreshIconClicked = {
+                    viewModel.onEvent(EnvironmentVariablesScreenEvent.RefreshEnvironmentVariables(application, scope))
                 }
             )
 
@@ -123,7 +123,9 @@ fun EnvironmentVariablesScreenContent(
         EnvironmentVariableListUi(
             environmentVariables = environmentVariables,
             listState = listState,
-            onItemActionClicked = onCopyValueItemClicked
+            onItemActionClicked = {value ->
+                onCopyValueItemClicked(value)
+            }
         )
 
 

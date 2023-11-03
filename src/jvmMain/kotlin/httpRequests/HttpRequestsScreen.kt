@@ -1,5 +1,6 @@
 package httpRequests
 
+import AppViewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
@@ -16,11 +17,11 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import common.ui.composables.RefreshButton
 import common.ui.composables.ScreenTitle
 import common.ui.composables.TableCell
 import common.ui.composables.screens.ErrorScreen
@@ -38,14 +39,13 @@ import theme.SpringMonitorTheme
 @Composable
 fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) {
 
-    println("current app from requests screen: $application")
 
-    var refreshHttpTraces by remember {
+    var refreshHttpTraces by rememberSaveable {
         mutableStateOf(false)
     }
 
-    val viewModel by remember {
-        mutableStateOf(HttpTraceViewModel())
+    val viewModel:HttpTraceViewModel by rememberSaveable {
+        mutableStateOf(AppViewModels.httpRequestsViewModel)
     }
 
     val state: HttpTraceScreenState by viewModel.state.collectAsState()
@@ -54,12 +54,11 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
 
     LaunchedEffect(key1 = application, key2 = refreshHttpTraces) {
-        coroutineScope.coroutineContext.cancelChildren()
         viewModel.onEvent(
             HttpTraceEvent.GetAllTraces(
                 application,
                 coroutineScope = coroutineScope,
-                liveUpdates = refreshHttpTraces
+                refresh = refreshHttpTraces
             )
         )
 
@@ -71,7 +70,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
         ScreenTitle(
             titleText = "Http Trace",
             iconVector = Icons.Filled.Refresh,
-            onIconClicked = { refreshHttpTraces = true })
+            onRefreshIconClicked = { refreshHttpTraces = true })
 
         Spacer(modifier = Modifier.height(10.dp))
 

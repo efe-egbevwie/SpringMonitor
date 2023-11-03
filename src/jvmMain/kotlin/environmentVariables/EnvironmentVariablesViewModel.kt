@@ -18,9 +18,6 @@ class EnvironmentVariablesViewModel : Serializable {
     var state = MutableStateFlow(EnvironmentVariablesScreenState())
         private set
 
-    init {
-        logger.info { "view model initialized" }
-    }
 
     fun onEvent(event: EnvironmentVariablesScreenEvent) {
         when (event) {
@@ -28,10 +25,21 @@ class EnvironmentVariablesViewModel : Serializable {
                 application = event.application,
                 scope = event.scope
             )
+
+            is EnvironmentVariablesScreenEvent.RefreshEnvironmentVariables -> getEnvironmentVariables(
+                application = event.application,
+                scope = event.scope,
+                refresh = true
+            )
         }
     }
 
-    private fun getEnvironmentVariables(application: Application, scope: CoroutineScope) {
+    private fun getEnvironmentVariables(application: Application, scope: CoroutineScope, refresh: Boolean = false) {
+
+        val environmentVariableAlreadyLoaded = state.value.environmentVariables.isNotEmpty()
+
+        if (environmentVariableAlreadyLoaded and !refresh) return
+
         scope.launch {
             setStateToLoading()
 
@@ -70,6 +78,9 @@ class EnvironmentVariablesViewModel : Serializable {
 
 sealed class EnvironmentVariablesScreenEvent {
     data class GetEnvironmentVariables(val application: Application, val scope: CoroutineScope) :
+        EnvironmentVariablesScreenEvent()
+
+    data class RefreshEnvironmentVariables(val application: Application, val scope: CoroutineScope) :
         EnvironmentVariablesScreenEvent()
 }
 

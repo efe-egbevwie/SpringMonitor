@@ -22,12 +22,17 @@ class HttpTraceViewModel {
         when (screenEvent) {
             is HttpTraceEvent.GetAllTraces -> getAllTraces(
                 application = screenEvent.application,
-                coroutineScope = screenEvent.coroutineScope
+                coroutineScope = screenEvent.coroutineScope,
+                refresh = screenEvent.refresh
             )
         }
     }
 
-    private fun getAllTraces(application: Application, coroutineScope: CoroutineScope) {
+    private fun getAllTraces(application: Application, coroutineScope: CoroutineScope, refresh: Boolean) {
+
+        val httpTraceAlreadyFetched: Boolean = state.value.httpTraces.isNotEmpty()
+
+        if (httpTraceAlreadyFetched and !refresh) return
 
         setStateToLoading()
 
@@ -79,8 +84,8 @@ data class HttpTraceScreenState(
 sealed class HttpTraceEvent {
     data class GetAllTraces(
         val application: Application,
-        val liveUpdates: Boolean,
-        val coroutineScope: CoroutineScope
+        val coroutineScope: CoroutineScope,
+        val refresh: Boolean = false
     ) : HttpTraceEvent()
 
 }
