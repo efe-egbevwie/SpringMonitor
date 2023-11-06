@@ -4,9 +4,12 @@ import AppViewModels
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
@@ -23,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import common.ui.composables.ScreenTitle
+import common.ui.composables.ScrollBar
 import common.ui.composables.TableCell
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
@@ -32,7 +36,6 @@ import domain.models.Application
 import domain.models.HttpTrace
 import domain.models.TraceRequest
 import domain.models.TraceResponse
-import kotlinx.coroutines.cancelChildren
 import theme.SpringMonitorTheme
 
 
@@ -40,29 +43,15 @@ import theme.SpringMonitorTheme
 fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) {
 
 
-    var refreshHttpTraces by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    val viewModel:HttpTraceViewModel by rememberSaveable {
+    val viewModel: HttpTraceViewModel by rememberSaveable {
         mutableStateOf(AppViewModels.httpRequestsViewModel)
     }
 
     val state: HttpTraceScreenState by viewModel.state.collectAsState()
 
-    val coroutineScope = rememberCoroutineScope()
 
-
-    LaunchedEffect(key1 = application, key2 = refreshHttpTraces) {
-        viewModel.onEvent(
-            HttpTraceEvent.GetAllTraces(
-                application,
-                coroutineScope = coroutineScope,
-                refresh = refreshHttpTraces
-            )
-        )
-
-        refreshHttpTraces = false
+    LaunchedEffect(key1 = application) {
+        viewModel.onEvent(HttpTraceEvent.GetHttpTraces(application))
     }
 
     Column(modifier = modifier.fillMaxSize(), horizontalAlignment = Alignment.Start) {
@@ -70,7 +59,10 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
         ScreenTitle(
             titleText = "Http Trace",
             iconVector = Icons.Filled.Refresh,
-            onRefreshIconClicked = { refreshHttpTraces = true })
+            onRefreshIconClicked = {
+                viewModel.onEvent(HttpTraceEvent.RefreshTraces(application))
+            }
+        )
 
         Spacer(modifier = Modifier.height(10.dp))
 
@@ -79,6 +71,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
             is LoadingState.SuccessLoading -> HttpTraceList(
                 modifier = Modifier.fillMaxSize().padding(end = 16.dp),
                 httpTraces = state.httpTraces,
+                listState = viewModel.traceListState
             )
 
             is LoadingState.FailedToLoad -> ErrorScreen(exception = state.error)
@@ -91,18 +84,7 @@ fun HttpRequestsScreen(modifier: Modifier = Modifier, application: Application) 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
-
-    val listState = rememberLazyListState()
-
-    val currentList = remember {
-        mutableStateListOf<HttpTrace>()
-    }
-
-
-    LaunchedEffect(key1 = httpTraces) {
-        currentList.addAll(httpTraces)
-    }
+fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>, listState: LazyListState) {
 
 
     Box {
@@ -123,27 +105,16 @@ fun HttpTraceList(modifier: Modifier = Modifier, httpTraces: List<HttpTrace>) {
                 }
             }
 
-            items(currentList.distinct(), key = { trace -> trace }) { trace ->
+            items(httpTraces, key = { trace -> trace }) { trace ->
                 HttpTraceItem(httpTrace = trace, modifier = Modifier)
             }
         }
 
-
-        VerticalScrollbar(
-            style = ScrollbarStyle(
-                minimalHeight = 40.dp,
-                thickness = 8.dp,
-                hoverDurationMillis = 0,
-                shape = RoundedCornerShape(8.dp),
-                unhoverColor = MaterialTheme.colorScheme.secondary,
-                hoverColor = MaterialTheme.colorScheme.primary
-
-            ),
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp),
-            adapter = rememberScrollbarAdapter(
-                scrollState = listState
-            )
+        ScrollBar(
+            listState = listState,
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp)
         )
+
     }
 
 
@@ -177,18 +148,6 @@ fun HttpTraceItem(modifier: Modifier = Modifier, httpTrace: HttpTrace) {
     }
 }
 
-
-@Preview
-@Composable
-fun HttpTraceItemPreview() {
-    SpringMonitorTheme {
-
-        Surface(modifier = Modifier.fillMaxSize()) {
-            HttpTraceItem(httpTrace = sampleHttpTrace)
-        }
-
-    }
-}
 
 @Composable
 fun HttpTraceSummaryUi(
@@ -332,7 +291,6 @@ fun HttpTraceRequestUi(traceRequest: TraceRequest) {
     }
 }
 
-
 @Composable
 fun HttpTraceResponseUi(traceResponse: TraceResponse) {
     Column {
@@ -351,6 +309,7 @@ fun HttpTraceResponseUi(traceResponse: TraceResponse) {
     }
 }
 
+
 @Preview
 @Composable
 fun HttpTraceListPreview() {
@@ -360,7 +319,7 @@ fun HttpTraceListPreview() {
 
     SpringMonitorTheme {
         Surface {
-            HttpTraceList(httpTraces = sampleTraces)
+            HttpTraceList(httpTraces = sampleTraces, listState = rememberLazyListState())
         }
     }
 }
@@ -375,5 +334,17 @@ fun HttpTraceSummaryPreview() {
 @Preview
 fun HttpTraceDetailPreview() {
     HttpTraceDetail(trace = sampleHttpTrace)
+}
+
+@Preview
+@Composable
+fun HttpTraceItemPreview() {
+    SpringMonitorTheme {
+
+        Surface(modifier = Modifier.fillMaxSize()) {
+            HttpTraceItem(httpTrace = sampleHttpTrace)
+        }
+
+    }
 }
 

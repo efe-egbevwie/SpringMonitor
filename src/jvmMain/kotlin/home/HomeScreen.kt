@@ -27,13 +27,10 @@ import dashboard.DashboardScreen
 import domain.models.Application
 import environmentVariables.EnvironmentVariablesScreen
 import httpRequests.HttpRequestsScreen
-import io.github.oshai.kotlinlogging.KotlinLogging
 import setupApplication.composables.ApplicationItem
 import theme.SpringMonitorTheme
 
 data class HomeScreenDestination(val selectedApplicationId: Int) : Screen {
-
-    private val logger = KotlinLogging.logger { }
 
     @Composable
     override fun Content() {
@@ -146,9 +143,11 @@ fun HomeScreen(
                     onDeleteApplicationClicked = {
                         showDeleteApplicationDialog = true
                     },
-                    modifier = Modifier.fillMaxWidth(0.2f).clickable {
-                        showAllApplicationsDropDown = !showAllApplicationsDropDown
-                    }
+                    modifier = Modifier
+                        .fillMaxWidth(0.2f)
+                        .clickable {
+                            showAllApplicationsDropDown = !showAllApplicationsDropDown
+                        }
                 )
 
                 if (showAllApplicationsDropDown) {
@@ -420,7 +419,8 @@ fun HomeScreenPreview() {
         HomeScreen(
             selectedApplication = sampleApplication,
             allApplications = sampleApplications,
-            onApplicationSelected = {})
+            onApplicationSelected = {}
+        )
     }
 
 }

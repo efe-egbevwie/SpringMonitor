@@ -3,22 +3,23 @@ package environmentVariables
 import AppViewModels
 import androidx.compose.animation.animateContentSize
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.ScrollbarStyle
-import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollbarAdapter
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.*
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import common.ui.composables.ScreenTitle
+import common.ui.composables.ScrollBar
 import common.ui.composables.screens.ErrorScreen
 import common.ui.composables.screens.LoadingScreen
 import common.ui.models.LoadingState
@@ -39,7 +40,7 @@ fun EnvironmentVariablesScreen(
 ) {
 
 
-    val viewModel by rememberSaveable {
+    val viewModel: EnvironmentVariablesViewModel by rememberSaveable {
         mutableStateOf(AppViewModels.environmentVariableViewModel)
     }
 
@@ -95,6 +96,7 @@ fun EnvironmentVariablesScreen(
                 EnvironmentVariablesScreenContent(
                     modifier = modifier.padding(end = 16.dp),
                     environmentVariables = state.environmentVariables,
+                    listState = viewModel.environmentVariablesListState,
                     onCopyValueItemClicked = { value ->
                         copyEnvironmentVariableToClipBoard(value)
                         showValueCopiedSnackBar = true
@@ -114,35 +116,24 @@ fun EnvironmentVariablesScreen(
 fun EnvironmentVariablesScreenContent(
     modifier: Modifier = Modifier,
     environmentVariables: List<EnvironmentVariable>,
-    onCopyValueItemClicked: (value: String) -> Unit
+    onCopyValueItemClicked: (value: String) -> Unit,
+    listState: LazyListState
 ) {
     Box(modifier = modifier) {
 
-        val listState = rememberLazyListState()
 
         EnvironmentVariableListUi(
             environmentVariables = environmentVariables,
             listState = listState,
-            onItemActionClicked = {value ->
+            onItemActionClicked = { value ->
                 onCopyValueItemClicked(value)
             }
         )
 
 
-        VerticalScrollbar(
-            style = ScrollbarStyle(
-                minimalHeight = 40.dp,
-                thickness = 8.dp,
-                hoverDurationMillis = 0,
-                shape = RoundedCornerShape(8.dp),
-                unhoverColor = MaterialTheme.colorScheme.secondary,
-                hoverColor = MaterialTheme.colorScheme.primary
-
-            ),
-            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp),
-            adapter = rememberScrollbarAdapter(
-                scrollState = listState
-            )
+        ScrollBar(
+            listState = listState,
+            modifier = Modifier.align(Alignment.CenterEnd).fillMaxHeight().padding(top = 10.dp)
         )
     }
 }
@@ -196,7 +187,8 @@ fun EnvironmentVariablesScreenPreview() {
         Surface {
             EnvironmentVariablesScreenContent(
                 environmentVariables = previewEnvironmentVariables,
-                onCopyValueItemClicked = {}
+                onCopyValueItemClicked = {},
+                listState = rememberLazyListState()
             )
         }
     }

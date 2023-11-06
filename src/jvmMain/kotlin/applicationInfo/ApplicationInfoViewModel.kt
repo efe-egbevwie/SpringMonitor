@@ -5,7 +5,6 @@ import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.info.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,8 +14,6 @@ import kotlinx.coroutines.launch
 class ApplicationInfoViewModel {
 
     val state = MutableStateFlow(ApplicationInfoScreenState())
-
-    private val logger = KotlinLogging.logger { }
 
     fun onEvent(event: ApplicationInfoScreenEvent) {
         when (event) {

@@ -1,11 +1,14 @@
 package environmentVariables
 
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import client.ActuatorRemoteClient
 import common.ui.models.LoadingState
 import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.environment.EnvironmentVariable
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,9 +17,9 @@ import java.io.Serializable
 
 class EnvironmentVariablesViewModel : Serializable {
 
-    private val logger = KotlinLogging.logger { }
     var state = MutableStateFlow(EnvironmentVariablesScreenState())
         private set
+    var environmentVariablesListState: LazyListState by mutableStateOf(LazyListState(0, 0))
 
 
     fun onEvent(event: EnvironmentVariablesScreenEvent) {
