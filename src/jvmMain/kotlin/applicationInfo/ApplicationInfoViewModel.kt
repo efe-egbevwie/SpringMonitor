@@ -6,8 +6,8 @@ import domain.models.Application
 import domain.models.GetDataResult
 import domain.models.info.*
 import io.github.oshai.kotlinlogging.KotlinLogging
-import io.github.oshai.kotlinlogging.withLoggingContext
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -177,7 +177,7 @@ data class ApplicationInfoScreenState(
 sealed class ApplicationInfoScreenEvent {
     data class GetApplicationInfo(
         val application: Application,
-        val scope: CoroutineScope,
+        val scope: CoroutineScope = CoroutineScope(context = Dispatchers.Default),
         val refresh: Boolean = false
     ) :
         ApplicationInfoScreenEvent()

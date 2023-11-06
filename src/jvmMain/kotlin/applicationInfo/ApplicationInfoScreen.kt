@@ -7,14 +7,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ReadMore
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import applicationInfo.composables.ApplicationInfoCard
 import applicationInfo.models.ApplicationInfoForUi
@@ -34,10 +30,9 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
         mutableStateOf(AppViewModels.infoViewModel)
     }
 
-    val scope = rememberCoroutineScope()
 
     LaunchedEffect(application) {
-        viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application, scope))
+        viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application))
     }
 
     val state: ApplicationInfoScreenState by viewModel.state.collectAsState()
@@ -48,7 +43,7 @@ fun ApplicationInfoScreen(application: Application, modifier: Modifier = Modifie
             titleText = "Info",
             iconVector = Icons.Filled.Refresh,
             onRefreshIconClicked = {
-                viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application, scope, refresh = true))
+                viewModel.onEvent(ApplicationInfoScreenEvent.GetApplicationInfo(application, refresh = true))
             }
         )
 

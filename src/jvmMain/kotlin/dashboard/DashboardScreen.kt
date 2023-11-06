@@ -18,28 +18,21 @@ import dashboard.composables.ApplicationUpTimeUi
 import dashboard.composables.ResourceMetricCardUi
 import domain.models.Application
 import domain.models.DashboardMetrics
-import kotlinx.coroutines.cancelChildren
 
 
 @Composable
 fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
 
-    val viewModel:DashboardViewModel by rememberSaveable {
+    val viewModel: DashboardViewModel by rememberSaveable {
         mutableStateOf(AppViewModels.dashBoardViewModel)
     }
 
-    var fetchLiveUpdates by remember {
-        mutableStateOf(false)
-    }
-
-    val coroutineScope = rememberCoroutineScope()
     val state: DashBoardScreenState by viewModel.state.collectAsState()
 
-    val dashBoardMetrics = state.dashboardMetrics
+    val dashBoardMetrics: DashboardMetrics? = state.dashboardMetrics
 
-    LaunchedEffect(key1 = application, key2 = fetchLiveUpdates) {
-        coroutineScope.coroutineContext.cancelChildren()
-        viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application, coroutineScope, fetchLiveUpdates))
+    LaunchedEffect(key1 = application) {
+        viewModel.onEvent(DashBoardScreenEvent.GetSystemMetrics(application = application))
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -57,8 +50,11 @@ fun DashboardScreen(modifier: Modifier = Modifier, application: Application) {
                 DashBoardScreenContent(
                     modifier = modifier.padding(end = 20.dp),
                     metrics = dashBoardMetrics,
-                    onFetchLiveUpdatesToggled = {
-                        fetchLiveUpdates = it
+                    onFetchLiveUpdatesToggled = { liveUpdateToggled ->
+                        when (liveUpdateToggled) {
+                            true -> viewModel.onEvent(DashBoardScreenEvent.GetLiveSystemMetrics(application))
+                            false -> viewModel.onEvent(DashBoardScreenEvent.CancelLiveSystemMetrics)
+                        }
                     }
                 )
             }

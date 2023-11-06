@@ -36,9 +36,8 @@ kotlin {
 
         val jvmMain by getting {
             dependencies {
-                implementation(compose.desktop.currentOs)
 
-                val voyagerVersion = "1.0.0-rc05"
+                val voyagerVersion = "1.0.0-rc09"
                 val ktorVersion = "2.3.3"
                 val coroutinesVersion = "1.7.1"
                 val logbackVersion = "1.4.11"
@@ -71,9 +70,6 @@ kotlin {
 
                 implementation("app.cash.sqldelight:sqlite-driver:$sqlDelightVersion")
                 implementation("app.cash.sqldelight:coroutines-extensions:$sqlDelightVersion")
-
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-                implementation("org.jetbrains.kotlin:kotlin-script-runtime:1.5.21")
 
 
             }
