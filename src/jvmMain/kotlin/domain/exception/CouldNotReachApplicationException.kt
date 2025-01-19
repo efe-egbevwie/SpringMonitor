@@ -1,3 +1,0 @@
-package domain.exception
-
-class CouldNotReachApplicationException:RuntimeException()
